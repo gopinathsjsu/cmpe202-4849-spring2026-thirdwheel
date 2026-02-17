@@ -1,0 +1,22 @@
+# Zestify - Project Dependencies
+# Note: Since this is a Node.js project, dependencies are typically managed via `package.json` and installed using `npm install`.
+# This file is provided as a plain-text reference of the core packages used.
+
+# --- Global / System Requirements ---
+Node.js >= 18.x
+npm >= 9.x
+
+# --- Backend Dependencies (Express.js) ---
+bcryptjs==2.4.3
+better-sqlite3==11.7.0
+cors==2.8.5
+express==4.21.0
+jsonwebtoken==9.0.2
+multer==1.4.5-lts.1
+nodemailer==6.9.16
+uuid==11.0.3
+
+# --- Frontend Dependencies (Next.js) ---
+next==16.1.6
+react==19.2.3
+react-dom==19.2.3
