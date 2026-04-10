@@ -1,0 +1,74 @@
+.moderation-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 20px;
+}
+
+.moderation-card {
+    overflow: hidden;
+}
+
+.moderation-card:hover {
+    transform: translateY(-2px);
+}
+
+.moderation-card-header {
+    height: 100px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.moderation-emoji {
+    font-size: 40px;
+    opacity: 0.5;
+}
+
+.moderation-card-header .badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.moderation-card-body {
+    padding: 20px;
+}
+
+.moderation-card-body h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+
+.moderation-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.moderation-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.moderation-actions {
+    display: flex;
+    gap: 10px;
+}
+
+@media (max-width: 768px) {
+    .moderation-grid {
+        grid-template-columns: 1fr;
+    }
+}
