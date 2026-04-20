@@ -70,6 +70,7 @@ const has = (s) => SERVICE === 'all' || SERVICE === s;
 if (has('auth'))          app.use('/api/auth',          require('./routes/auth'));
 if (has('events'))        app.use('/api/events',        require('./routes/events'));
 if (has('tickets'))       app.use('/api/tickets',       require('./routes/tickets'));
+if (has('payments'))      app.use('/api/payments',      require('./routes/payments'));
 if (has('admin'))         app.use('/api/admin',         require('./routes/admin'));
 if (has('admin'))         app.use('/api/users',         require('./routes/users'));
 if (has('notifications')) app.use('/api/notifications', require('./routes/notifications'));

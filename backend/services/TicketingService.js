@@ -13,7 +13,7 @@ const { assertTicketTransition } = require('../domain/StateMachine');
 const { getCache } = require('../adapters/CacheAdapter');
 
 class TicketingService {
-    static async purchase({ userId, eventId, quantity = 1, paymentMethodHint}) {
+    static async purchase({ userId, eventId, quantity = 1, paymentMethodHint, paymentIntentId }) {
         const event = await EventRepository.findByIdRaw(eventId);
         if (!event || event.status !== 'approved') {
             throw Object.assign(new Error('Event not found or not available.'), { statusCode: 404 });
@@ -29,7 +29,7 @@ class TicketingService {
 
         const totalPrice = (event.price || 0) * quantity;
         const strategy = selectStrategy(totalPrice, paymentMethodHint);
-        const payment = await strategy.charge({ amount: totalPrice});
+        const payment = await strategy.charge({ amount: totalPrice, paymentIntentId });
 
         const ticket = await withTx(async (client) => {
             const ticketCode = uuidv4().slice(0, 8).toUpperCase();

@@ -119,6 +119,10 @@ export const users = {
     myStats: () => apiRequest('/users/me/stats'),
 };
 
+// Payments (Stripe)
+export const payments = {
+    createIntent: (body) => apiRequest('/payments/intent', { method: 'POST', body: JSON.stringify(body) }),
+};
 
 // Notifications
 export const notifications = {

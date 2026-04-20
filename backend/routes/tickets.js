@@ -11,10 +11,10 @@ router.post('/', authenticateToken, validate({
     event_id: { required: true, type: 'number' },
     quantity: { required: false, type: 'number', min: 1, max: 10 },
 }), asyncHandler(async (req, res) => {
-    const { event_id, quantity = 1, payment_method } = req.body;
+    const { event_id, quantity = 1, payment_method, payment_intent_id } = req.body;
     const ticket = await TicketingService.purchase({
         userId: req.user.id, eventId: event_id, quantity,
-        paymentMethodHint: payment_method,
+        paymentMethodHint: payment_method, paymentIntentId: payment_intent_id,
     });
     res.status(201).json({ message: 'Ticket confirmed!', ticket });
 }));
