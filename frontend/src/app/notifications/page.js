@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { notifications as notifApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/toast';
+import '../dashboard/dashboard.css';
 import './notifications.css';
 
 export default function NotificationsPage() {

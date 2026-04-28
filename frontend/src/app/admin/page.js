@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { admin as adminApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/toast';
+import '../dashboard/dashboard.css';
 import './admin.css';
 
 export default function AdminPage() {
