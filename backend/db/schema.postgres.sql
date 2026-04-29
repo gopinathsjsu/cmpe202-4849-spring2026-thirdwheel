@@ -73,6 +73,9 @@ CREATE TABLE IF NOT EXISTS tickets (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_active_ticket
+  ON tickets (user_id, event_id)
+  WHERE status != 'cancelled';
 
 CREATE TABLE IF NOT EXISTS notifications (
   id SERIAL PRIMARY KEY,
