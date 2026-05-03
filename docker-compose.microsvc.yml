@@ -1,0 +1,184 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: zestify-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zestify
+      POSTGRES_PASSWORD: zestify
+      POSTGRES_DB: zestify
+    ports:
+      - "55432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zestify -d zestify"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api-auth:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-auth
+    restart: unless-stopped
+    environment:
+      SERVICE: auth
+      PORT: 5001
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGPORT: 5432
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      LOG_LEVEL: info
+      AUTH_RATE_LIMIT_MAX: 200
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api-events:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-events
+    restart: unless-stopped
+    environment:
+      SERVICE: events
+      PORT: 5002
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      LOG_LEVEL: info
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api-tickets:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-tickets
+    restart: unless-stopped
+    environment:
+      SERVICE: tickets
+      PORT: 5003
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      EMAIL_PROVIDER: ethereal
+      LOG_LEVEL: info
+      # Cross-service: api-tickets calls api-payments to verify Stripe intents.
+      PAYMENTS_SERVICE_URL: http://api-payments:5006
+      INTERNAL_SECRET: ${INTERNAL_SECRET:-internal-zestify-2026}
+    depends_on:
+      postgres: { condition: service_healthy }
+      api-payments: { condition: service_started }
+
+  api-payments:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-payments
+    restart: unless-stopped
+    environment:
+      SERVICE: payments
+      PORT: 5006
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      LOG_LEVEL: info
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+      INTERNAL_SECRET: ${INTERNAL_SECRET:-internal-zestify-2026}
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api-notifications:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-notifications
+    restart: unless-stopped
+    environment:
+      SERVICE: notifications
+      PORT: 5004
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      LOG_LEVEL: info
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  api-admin:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-api-admin
+    restart: unless-stopped
+    environment:
+      SERVICE: admin
+      PORT: 5005
+      NODE_ENV: production
+      JWT_SECRET: ${JWT_SECRET:-zestify-secret-key-2026}
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+      EMAIL_PROVIDER: ethereal
+      LOG_LEVEL: info
+    depends_on:
+      postgres: { condition: service_healthy }
+
+  frontend:
+    image: ${FRONTEND_IMAGE:-zestify-frontend:latest}
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: /api
+        NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+    container_name: zestify-frontend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+    depends_on:
+      api-events: { condition: service_started }
+
+  nginx:
+    image: nginx:alpine
+    container_name: zestify-nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx/nginx.microsvc.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - api-auth
+      - api-events
+      - api-tickets
+      - api-payments
+      - api-notifications
+      - api-admin
+      - frontend
+
+  seed:
+    image: ${BACKEND_IMAGE:-zestify-backend:latest}
+    build: ./backend
+    container_name: zestify-seed
+    profiles: ["init"]
+    environment:
+      PGHOST: ${PGHOST:-postgres}
+      PGUSER: zestify
+      PGPASSWORD: ${PGPASSWORD:-zestify}
+      PGDATABASE: zestify
+    depends_on:
+      postgres: { condition: service_healthy }
+    command: ["node", "db/seed.js"]
+
+volumes:
+  pgdata:
