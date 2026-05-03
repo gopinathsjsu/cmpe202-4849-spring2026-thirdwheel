@@ -1,0 +1,173 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  GCP_PROJECT: healthy-mender-491009-b4
+  GCP_REGION: us-west1
+  GAR_REPO: zestify
+  REGISTRY: us-west1-docker.pkg.dev/healthy-mender-491009-b4/zestify
+
+jobs:
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: install backend deps
+        working-directory: backend
+        run: npm install
+      - name: run unit tests
+        working-directory: backend
+        run: node --test tests/unit/PaymentStrategy.test.js tests/unit/StateMachine.test.js tests/unit/ModerationPipeline.test.js tests/unit/validate.test.js
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: install
+        working-directory: frontend
+        run: npm install --legacy-peer-deps
+      - name: lint
+        working-directory: frontend
+        run: npm run lint
+      - name: build
+        working-directory: frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_URL: /api
+          NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_dummy
+
+  integration-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: zestify
+          POSTGRES_PASSWORD: zestify
+          POSTGRES_DB: zestify
+        ports: ['5432:5432']
+        options: --health-cmd "pg_isready -U zestify -d zestify" --health-interval 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: install backend
+        working-directory: backend
+        run: npm install
+      - name: migrate + seed
+        working-directory: backend
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: zestify
+          PGPASSWORD: zestify
+          PGDATABASE: zestify
+        run: node db/seed.js
+      - name: start backend (monolith mode)
+        working-directory: backend
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: zestify
+          PGPASSWORD: zestify
+          PGDATABASE: zestify
+          JWT_SECRET: test-jwt-secret
+          AUTH_RATE_LIMIT_MAX: 999
+          PORT: 5001
+          SERVICE: all
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SK }}
+        run: |
+          node server.js &
+          for i in $(seq 1 30); do curl -fsS http://localhost:5001/readyz && break || sleep 2; done
+      - name: integration tests
+        working-directory: backend
+        env:
+          TEST_API_URL: http://localhost:5001
+          STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SK }}
+        run: node --test tests/integration/api.test.js
+
+  build-and-push:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: [unit-tests, frontend-build, integration-tests]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
+      - name: build + push backend
+        run: |
+          SHA=${GITHUB_SHA::7}
+          docker buildx build --platform linux/amd64 \
+            -t ${REGISTRY}/backend:${SHA} \
+            -t ${REGISTRY}/backend:microsvc \
+            --push ./backend
+      - name: build + push nginx
+        run: |
+          SHA=${GITHUB_SHA::7}
+          mkdir -p nginx-build && cp nginx/nginx.microsvc.conf nginx-build/nginx.conf
+          printf 'FROM nginx:alpine\nCOPY nginx.conf /etc/nginx/nginx.conf\n' > nginx-build/Dockerfile
+          docker buildx build --platform linux/amd64 \
+            -t ${REGISTRY}/nginx:${SHA} \
+            -t ${REGISTRY}/nginx:microsvc \
+            --push ./nginx-build
+      - name: build + push frontend
+        run: |
+          SHA=${GITHUB_SHA::7}
+          docker buildx build --platform linux/amd64 \
+            --build-arg NEXT_PUBLIC_API_URL=/api \
+            --build-arg "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PK }}" \
+            -t ${REGISTRY}/frontend:${SHA} \
+            -t ${REGISTRY}/frontend:latest \
+            --push ./frontend
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: rolling-restart MIG to pull new images
+        run: |
+          gcloud compute instance-groups managed rolling-action restart zestify-microsvc-mig \
+            --region=${GCP_REGION} \
+            --max-unavailable=3 \
+            --quiet
+      - name: wait MIG stable + smoke
+        run: |
+          for i in $(seq 1 30); do
+            if gcloud compute instance-groups managed describe zestify-microsvc-mig --region=${GCP_REGION} --format='value(status.versionTarget.isReached)' | grep -q True; then
+              echo "MIG stable"; break
+            fi
+            sleep 10
+          done
+          LB_IP=$(gcloud compute forwarding-rules describe zestify-fwd --global --format='value(IPAddress)')
+          echo "LB IP: ${LB_IP}"
+          for i in $(seq 1 30); do
+            curl -fsS "http://${LB_IP}/api/health" >/dev/null 2>&1 && break || sleep 5
+          done
+          curl -fsS "http://${LB_IP}/api/health" | jq .
+          curl -fsS "http://${LB_IP}/api/events?limit=2" | jq '.pagination'
