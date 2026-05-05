@@ -6,8 +6,7 @@ Eventbrite-style event management platform built as a fully production-grade mic
 system deployed on Google Cloud Platform.
 
 > **Live demo:** **<https://34.107.158.154.nip.io>**
-> **Repo (canonical):** <https://github.com/Nihar4/202_final_test>
-> **Repo (course mirror):** <https://github.com/gopinathsjsu/team-project-thirdwheel>
+> **Repo:** <https://github.com/gopinathsjsu/team-project-thirdwheel>
 
 ---
 
@@ -138,7 +137,7 @@ Click the appropriate Quick-Login button on the `/login` page → fields auto-fi
 ## Local Development
 
 ```bash
-git clone https://github.com/Nihar4/202_final_test.git zestify
+git clone https://github.com/gopinathsjsu/team-project-thirdwheel.git zestify
 cd zestify
 
 # 1. Copy env example + fill in your Stripe test keys + Gmail app password
@@ -167,7 +166,7 @@ See [docs/deployment-gcp.md](docs/deployment-gcp.md) for full GCP runbook includ
 - Global HTTPS Load Balancer + Google-managed SSL cert
 - GitHub Actions CI → AR push → MIG rolling-restart
 
-### Quick deploy (canonical repo only)
+### Quick deploy
 ```bash
 # Triggers full pipeline on push to main
 git push origin main
@@ -224,7 +223,7 @@ TEST_API_URL=http://localhost:8080 node --test tests/integration/api.test.js
 TEST_API_URL=https://34.107.158.154.nip.io ./scripts/smoke.sh
 ```
 
-CI runs unit + integration on every push (skipped silently on mirror forks that don't have `GCP_SA_KEY`).
+CI runs unit + integration on every push. Deploy steps require the `GCP_SA_KEY` repo secret and are skipped silently when absent.
 
 ---
 
