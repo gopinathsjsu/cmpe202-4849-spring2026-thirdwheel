@@ -159,7 +159,7 @@ Frontend → `http://localhost:8080` · Backend gateway → same URL prefixed `/
 
 ## Production Deployment
 
-See [docs/deployment-gcp.md](docs/deployment-gcp.md) for full GCP runbook including:
+See [deployment-gcp.md](deployment-gcp.md) for full GCP runbook including:
 - Compute Engine MIG + Instance Template + Startup Script
 - Cloud SQL provisioning + authorized networks
 - Artifact Registry repo + image promotion
@@ -281,8 +281,7 @@ zestify/
 ├── nginx/                      # nginx.microsvc.conf + Dockerfile
 ├── terraform/                  # Modules + envs/{dev,prod}
 ├── scripts/                    # vm-startup.sh, deploy.sh, smoke.sh, ci-local.sh, tf_apply.sh
-├── docs/
-│   └── deployment-gcp.md       # GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS)
+├── deployment-gcp.md           # GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS)
 ├── project-journal/            # Weekly scrum + XP values + backlog + burndown + task board (per-sprint)
 ├── docker-compose.microsvc.yml # Local 8-container stack
 └── .github/workflows/ci.yml    # Unit + frontend-build + integration + AR push + MIG restart
