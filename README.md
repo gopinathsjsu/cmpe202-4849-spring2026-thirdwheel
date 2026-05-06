@@ -18,7 +18,7 @@ system deployed on Google Cloud Platform.
 | **Soham Raj Jain** | Auth service + Tickets service + Integration tests + Frontend chrome | [@Soham-Raj-Jain](https://github.com/Soham-Raj-Jain) |
 | **Kalhar Patel** | Admin service + Notifications service + Adapters + DevOps | [@kalhar108](https://github.com/kalhar108) |
 
-Per-service ownership table → [docs/project-journal/task-board.md](docs/project-journal/task-board.md)
+Per-service ownership table → [project-journal/task-board.md](project-journal/task-board.md)
 
 ---
 
@@ -193,15 +193,15 @@ CI builds 6 service images + nginx + frontend in parallel matrix, pushes to Arti
 
 ## Project Journal (course requirement)
 
-All project-management artefacts live under [`docs/project-journal/`](docs/project-journal/):
+All project-management artefacts live under [`project-journal/`](project-journal/):
 
 | File | Contents |
 |------|----------|
-| [`weekly-scrum.md`](docs/project-journal/weekly-scrum.md) | 12-week scrum log with the three daily-standup questions per member per week |
-| [`xp-values.md`](docs/project-journal/xp-values.md) | Reflection on **Communication** + **Simplicity** XP core values |
-| [`sprint-backlog.csv`](docs/project-journal/sprint-backlog.csv) | All 40 stories + 5 backlog items with acceptance criteria, owner, points |
-| [`task-board.md`](docs/project-journal/task-board.md) | Swimlane view + sprint-by-sprint outcomes + per-member story ownership |
-| [`burndown.csv`](docs/project-journal/burndown.csv) | Velocity per sprint + daily burndown for the final sprint |
+| [`weekly-scrum.md`](project-journal/weekly-scrum.md) | 12-week scrum log with the three daily-standup questions per member per week |
+| [`xp-values.md`](project-journal/xp-values.md) | Reflection on **Communication** + **Simplicity** XP core values |
+| [`sprint-backlog.csv`](project-journal/sprint-backlog.csv) | All 40 stories + 5 backlog items with acceptance criteria, owner, points |
+| [`task-board.md`](project-journal/task-board.md) | Swimlane view + sprint-by-sprint outcomes + per-member story ownership |
+| [`burndown.csv`](project-journal/burndown.csv) | Velocity per sprint + daily burndown for the final sprint |
 
 > CSV files can be opened directly in Google Sheets via *File → Import → Upload*.
 
@@ -282,8 +282,8 @@ zestify/
 ├── terraform/                  # Modules + envs/{dev,prod}
 ├── scripts/                    # vm-startup.sh, deploy.sh, smoke.sh, ci-local.sh, tf_apply.sh
 ├── docs/
-│   ├── deployment-gcp.md       # GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS)
-│   └── project-journal/        # Weekly scrum + XP values + backlog + burndown + task board
+│   └── deployment-gcp.md       # GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS)
+├── project-journal/            # Weekly scrum + XP values + backlog + burndown + task board (per-sprint)
 ├── docker-compose.microsvc.yml # Local 8-container stack
 └── .github/workflows/ci.yml    # Unit + frontend-build + integration + AR push + MIG restart
 ```
