@@ -1,16 +1,37 @@
 # Zestify — UI Wireframes
 
-Low-fidelity wireframes for every screen in the application. Each wireframe is
-rendered two ways:
+Visual wireframes for every screen in the application. Each section shows:
 
-1. **ASCII layout** — quick mental model of structure, fits in a code review.
-2. **Mermaid flowchart** — interactive box-and-line view that renders on GitHub.
+1. **PNG mockup** — designed in low-fidelity wireframe tool, lives in [`wireframes/`](wireframes/).
+2. **ASCII layout** — quick mental model of structure, fits in a code review.
+3. **Mermaid flowchart** — interactive box-and-line view that renders on GitHub.
+
+## Screen index
+
+| # | Screen | Image | Section |
+|---|--------|-------|---------|
+| 1 | Landing page | [1.png](wireframes/1.png) | [§1](#1-landing-page--) |
+| 2 | Events listing | [2.png](wireframes/2.png) | [§2](#2-events-listing-events) |
+| 3a | Event detail — attendee | [3a.png](wireframes/3a.png) | [§3](#3-event-detail-page--role-aware-eventsid) |
+| 3b/3c | Event detail — organizer + admin | [3b3c.png](wireframes/3b3c.png) | [§3](#3-event-detail-page--role-aware-eventsid) |
+| 4 | Reschedule modal | [4.png](wireframes/4.png) | [§4](#4-reschedule-modal-organizer--admin-only) |
+| 5 | Ticket purchase modal | [5.png](wireframes/5.png) | [§5](#5-ticket-purchase-modal) |
+| 6/7 | Login + register | [6-7.png](wireframes/6-7.png) | [§6](#6-login-page-login) |
+| 8 | My Tickets | [8.png](wireframes/8.png) | [§8](#8-attendee-dashboard--my-tickets-dashboardmy-tickets) |
+| 9 | My Events | [9.png](wireframes/9.png) | [§9](#9-organizer-dashboard--my-events-dashboardmy-events) |
+| 10 | Attendees | [10.png](wireframes/10.png) | [§10](#10-organizer-attendees-page-dashboardattendeesid) |
+| 11 | Admin dashboard | [11.png](wireframes/11.png) | [§11](#11-admin-dashboard-admin) |
+| 12 | Notifications | [12.png](wireframes/12.png) | [§12](#12-notifications-page-notifications) |
+| 13 | Create event | [13.png](wireframes/13.png) | [§13](#13-event-creation-page-eventscreate) |
+| 14 | Email templates (5) | [14.png](wireframes/14.png) | [§14](#14-email-template-wireframes) |
 
 ---
 
 ## 1. Landing Page  `/`
 
 > Public · no auth required. Hero + featured events + categories + features.
+
+![Landing page wireframe](wireframes/1.png)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -64,6 +85,8 @@ flowchart TB
 
 > Public list with search, category, city, type, sort filters + paginated grid.
 
+![Events listing wireframe](wireframes/2.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  Navbar                                                                 │
@@ -113,6 +136,8 @@ logged-in user's role and relationship to the event.
 
 ### 3a. Attendee view
 
+![Event detail attendee wireframe](wireframes/3a.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  Events / Virtual Design Systems Workshop                  (breadcrumb) │
@@ -141,7 +166,9 @@ logged-in user's role and relationship to the event.
 └──────────────────────────────────────────┴──────────────────────────────┘
 ```
 
-### 3b. Organizer view (own event)
+### 3b. Organizer view (own event) · 3c. Admin view
+
+![Event detail organizer + admin wireframe](wireframes/3b3c.png)
 
 ```
    ┌──────────────────────────────────────────┐
@@ -188,6 +215,8 @@ flowchart TB
 
 > Opens from the Reschedule button. Submits to `POST /api/events/:id/reschedule`.
 
+![Reschedule modal wireframe](wireframes/4.png)
+
 ```
        ┌─────────────────────────────────────────────────────────┐
        │  📅 Reschedule Event                              ✕     │
@@ -223,6 +252,8 @@ flowchart TB
 ## 5. Ticket Purchase Modal
 
 > Free events submit instantly. Paid events embed Stripe Elements.
+
+![Ticket purchase modal wireframe](wireframes/5.png)
 
 ```
        ┌─────────────────────────────────────────────────────────┐
@@ -268,6 +299,8 @@ flowchart TB
 ## 6. Login Page  `/login`
 
 > Auth form + 3 demo quick-login buttons that pre-fill team credentials.
+
+![Login + register wireframe](wireframes/6-7.png)
 
 ```
                 ┌─────────────────────────────────────────────┐
@@ -339,6 +372,8 @@ flowchart TB
 
 ## 8. Attendee Dashboard — My Tickets  `/dashboard/my-tickets`
 
+![My tickets wireframe](wireframes/8.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  Navbar                                                                 │
@@ -365,6 +400,8 @@ flowchart TB
 
 ## 9. Organizer Dashboard — My Events  `/dashboard/my-events`
 
+![Organizer my events wireframe](wireframes/9.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  🎯 My Events                                  [ + Create New Event ]   │
@@ -387,6 +424,8 @@ flowchart TB
 
 ## 10. Organizer Attendees Page  `/dashboard/attendees/[id]`
 
+![Attendees wireframe](wireframes/10.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  ‹ Back to My Events                                                    │
@@ -406,6 +445,8 @@ flowchart TB
 ---
 
 ## 11. Admin Dashboard  `/admin`
+
+![Admin dashboard wireframe](wireframes/11.png)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -433,6 +474,8 @@ flowchart TB
 
 ## 12. Notifications Page  `/notifications`
 
+![Notifications wireframe](wireframes/12.png)
+
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
 │  🔔 Notifications                                    Mark all as read   │
@@ -454,6 +497,8 @@ flowchart TB
 ---
 
 ## 13. Event Creation Page  `/events/create`
+
+![Create event wireframe](wireframes/13.png)
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -489,6 +534,8 @@ flowchart TB
 
 All emails inherit the same structure — the `EmailAdapter.locationBlock()` is
 re-used across types so the **Google Maps link** is in every event email.
+
+![Email templates wireframe](wireframes/14.png)
 
 ### 14a. Ticket Confirmation
 
