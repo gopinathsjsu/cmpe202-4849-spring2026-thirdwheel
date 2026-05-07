@@ -8,6 +8,60 @@ import { useToast } from '@/lib/toast';
 import StripeCheckout from './StripeCheckout';
 import './event-detail.css';
 
+function RescheduleModal({ event, onClose, onSubmit }) {
+    const [date, setDate] = useState(event.date);
+    const [time, setTime] = useState(event.time);
+    const [endDate, setEndDate] = useState(event.end_date || '');
+    const [endTime, setEndTime] = useState(event.end_time || '');
+    const [reason, setReason] = useState('');
+    const [busy, setBusy] = useState(false);
+    return (
+        <div className="modal-backdrop" onClick={onClose}>
+            <div className="modal" onClick={e => e.stopPropagation()}>
+                <div className="modal-header">
+                    <h3>📅 Reschedule Event</h3>
+                    <button className="btn btn-ghost btn-icon" onClick={onClose}>✕</button>
+                </div>
+                <div className="modal-body">
+                    <p style={{ color: 'var(--text-muted)', marginBottom: 16, fontSize: 14 }}>
+                        Change date/time for <strong>{event.title}</strong>. All registered attendees will receive an email + notification with the new schedule.
+                    </p>
+                    <div className="form-group">
+                        <label className="form-label">New start date</label>
+                        <input className="form-input" type="date" value={date} onChange={e => setDate(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">New start time</label>
+                        <input className="form-input" type="time" value={time} onChange={e => setTime(e.target.value)} required />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">End date (optional)</label>
+                        <input className="form-input" type="date" value={endDate} onChange={e => setEndDate(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">End time (optional)</label>
+                        <input className="form-input" type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
+                    </div>
+                    <div className="form-group">
+                        <label className="form-label">Reason (shown in email)</label>
+                        <textarea className="form-input" rows={2} value={reason} onChange={e => setReason(e.target.value)}
+                            placeholder="e.g. Venue change, weather, scheduling conflict…" />
+                    </div>
+                </div>
+                <div className="modal-footer">
+                    <button className="btn btn-secondary" onClick={onClose} disabled={busy}>Cancel</button>
+                    <button className="btn btn-primary" disabled={busy} onClick={async () => {
+                        setBusy(true);
+                        try {
+                            await onSubmit({ date, time, end_date: endDate || null, end_time: endTime || null, reason });
+                        } finally { setBusy(false); }
+                    }}>{busy ? 'Saving…' : 'Reschedule + Notify'}</button>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function EventDetailPage() {
     const { id } = useParams();
     const router = useRouter();
@@ -19,6 +73,7 @@ export default function EventDetailPage() {
     const [loading, setLoading] = useState(true);
     const [ticketLoading, setTicketLoading] = useState(false);
     const [showTicketModal, setShowTicketModal] = useState(false);
+    const [showRescheduleModal, setShowRescheduleModal] = useState(false);
     const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
@@ -73,6 +128,33 @@ export default function EventDetailPage() {
             setEvent(data.event);
         } catch (err) {
             toast.error(err.error || 'Cancel failed');
+        }
+    };
+
+    const handleCancelEvent = async () => {
+        if (!confirm(`Cancel "${event.title}"? All registered attendees will be notified by email.`)) return;
+        const reason = prompt('Reason (optional, shown in cancellation email):') || '';
+        try {
+            const r = await eventsApi.cancel(event.id, reason);
+            toast.success(`Event cancelled. ${r.attendeesNotified || 0} attendees notified.`);
+            const data = await eventsApi.get(id);
+            setEvent(data.event);
+            setHasTicket(false);
+            setUserTicket(null);
+        } catch (err) {
+            toast.error(err.error || 'Cancel event failed');
+        }
+    };
+
+    const handleReschedule = async ({ date, time, end_date, end_time, reason }) => {
+        try {
+            const r = await eventsApi.reschedule(event.id, { date, time, end_date, end_time, reason });
+            toast.success(`Event rescheduled. ${r.attendeesNotified || 0} attendees notified.`);
+            setShowRescheduleModal(false);
+            const data = await eventsApi.get(id);
+            setEvent(data.event);
+        } catch (err) {
+            toast.error(err.error || 'Reschedule failed');
         }
     };
 
@@ -249,23 +331,74 @@ export default function EventDetailPage() {
                                 </div>
                             </div>
 
-                            {/* Actions */}
+                            {/* Actions — role-aware */}
                             <div className="sidebar-actions">
-                                {hasTicket ? (
-                                    <>
-                                        <div className="ticket-confirmed">
-                                            <span>✅</span> You&apos;re registered!
-                                            {userTicket && <div className="ticket-code">Code: {userTicket.ticket_code}</div>}
-                                        </div>
-                                        <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleCancel}>Cancel Registration</button>
-                                    </>
-                                ) : (
-                                    <button className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={isFull} onClick={() => user ? setShowTicketModal(true) : router.push('/login')}>
-                                        {isFull ? 'Sold Out' : isFree ? 'Register for Free' : `Get Tickets — $${event.price}`}
-                                    </button>
-                                )}
+                                {(() => {
+                                    const isAdmin = user?.role === 'admin';
+                                    const isOwner = user && event.organizer_id === user.id;
+                                    const isCancelled = event.status === 'cancelled';
+                                    const isCompleted = event.status === 'completed';
 
-                                {event.google_calendar_url && (
+                                    if (isCancelled) {
+                                        return <div className="ticket-confirmed" style={{ background: '#ef4444' }}>
+                                            <span>❌</span> Event Cancelled
+                                        </div>;
+                                    }
+                                    if (isCompleted) {
+                                        return <div className="ticket-confirmed" style={{ background: '#64748b' }}>
+                                            <span>✓</span> Event Completed
+                                        </div>;
+                                    }
+
+                                    // Admin: show cancel-event button (no register, since admins are not attendees here)
+                                    if (isAdmin) {
+                                        return <>
+                                            <div style={{ background: 'rgba(239,68,68,0.1)', padding: 12, borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+                                                🛡️ <strong>Admin actions</strong>
+                                            </div>
+                                            <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setShowRescheduleModal(true)}>
+                                                📅 Reschedule Event
+                                            </button>
+                                            <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleCancelEvent}>
+                                                ❌ Cancel Event
+                                            </button>
+                                        </>;
+                                    }
+
+                                    // Organizer of this event: cancel + reschedule (no register on own event)
+                                    if (isOwner) {
+                                        return <>
+                                            <div style={{ background: 'rgba(124,58,237,0.1)', padding: 12, borderRadius: 8, marginBottom: 12, fontSize: 13 }}>
+                                                ✨ <strong>Your event</strong> — manage below
+                                            </div>
+                                            <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setShowRescheduleModal(true)}>
+                                                📅 Reschedule Event
+                                            </button>
+                                            <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleCancelEvent}>
+                                                ❌ Cancel Event
+                                            </button>
+                                            <Link href={`/dashboard/attendees/${event.id}`} className="btn btn-ghost" style={{ width: '100%' }}>
+                                                👥 View Attendees ({event.tickets_sold})
+                                            </Link>
+                                        </>;
+                                    }
+
+                                    // Attendee (or not logged in): register flow
+                                    if (hasTicket) {
+                                        return <>
+                                            <div className="ticket-confirmed">
+                                                <span>✅</span> You&apos;re registered!
+                                                {userTicket && <div className="ticket-code">Code: {userTicket.ticket_code}</div>}
+                                            </div>
+                                            <button className="btn btn-danger" style={{ width: '100%' }} onClick={handleCancel}>Cancel My Ticket</button>
+                                        </>;
+                                    }
+                                    return <button className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={isFull} onClick={() => user ? setShowTicketModal(true) : router.push('/login')}>
+                                        {isFull ? 'Sold Out' : isFree ? 'Register for Free' : `Get Tickets — $${event.price}`}
+                                    </button>;
+                                })()}
+
+                                {event.google_calendar_url && event.status !== 'cancelled' && (
                                     <a href={event.google_calendar_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ width: '100%' }}>
                                         📅 Add to Google Calendar
                                     </a>
@@ -284,6 +417,15 @@ export default function EventDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Reschedule Modal */}
+            {showRescheduleModal && (
+                <RescheduleModal
+                    event={event}
+                    onClose={() => setShowRescheduleModal(false)}
+                    onSubmit={handleReschedule}
+                />
+            )}
 
             {/* Ticket Modal */}
             {showTicketModal && (
