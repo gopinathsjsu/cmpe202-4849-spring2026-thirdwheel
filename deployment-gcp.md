@@ -1,23 +1,36 @@
 # GCP Deployment
 
-## Architecture
+## Architecture (Cloud Run target — Terraform path)
 
+```mermaid
+flowchart TB
+    DNS["Cloud DNS / Domain<br/>(optional)"]
+    LB["🌐 Cloud Run HTTPS LB<br/>(built-in)"]
+    FE["☁️ Cloud Run · zestify-frontend<br/>Next.js 16 standalone"]
+    BE["☁️ Cloud Run · zestify-backend<br/>Express + pg · autoscale 0→10"]
+    SQL[("🗄️ Cloud SQL<br/>Postgres 16<br/>private socket")]
+    SM["🔐 Secret Manager<br/>JWT · DB pass · Stripe SK"]
+    GCS["📦 GCS bucket<br/>uploads"]
+    AR["📦 Artifact Registry<br/>Docker repo"]
+
+    DNS --> LB
+    LB --> FE
+    LB --> BE
+    BE --> SQL
+    BE --> SM
+    BE --> GCS
+    BE -.->|"pull image"| AR
+    FE -.->|"pull image"| AR
+
+    classDef gcp fill:#e0f2fe,stroke:#0369a1
+    classDef ext fill:#fef3c7,stroke:#d97706
+    class LB,FE,BE,SM,GCS,AR gcp
+    class SQL,DNS ext
 ```
-                      Cloud DNS / Domain (optional)
-                                │
-                       Cloud Run HTTPS LB (built-in)
-                                │
-            ┌───────────────────┼───────────────────┐
-            │                                       │
-   Cloud Run: zestify-frontend         Cloud Run: zestify-backend
-   (Next.js 16 standalone)             (Express + pg, autoscaling)
-                                                    │
-            ┌───────────────────────────────────────┼───────────────┐
-            │                       │               │               │
-       Cloud SQL              Secret Manager     GCS bucket     Artifact Registry
-       Postgres 16            (JWT, DB pass,     (uploads)      (Docker repo)
-       (private socket)        Stripe sk)
-```
+
+> Note: production deployment uses **Compute MIG + Global HTTPS LB** instead (see
+> [`architecture.md`](architecture.md)). Cloud Run path stays available via
+> Terraform modules for cheaper dev environments.
 
 ## Prereqs
 

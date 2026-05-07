@@ -10,6 +10,24 @@ system deployed on Google Cloud Platform.
 
 ---
 
+## 📚 Documentation Index
+
+| Doc | What's inside |
+|-----|---------------|
+| 🏛️ **[architecture.md](architecture.md)** | UML component + deployment diagrams · 5 sequence diagrams · ER diagram · design-pattern class diagram (all Mermaid, GitHub-rendered) |
+| 🖼️ **[wireframes.md](wireframes.md)** | PNG mockups + ASCII + Mermaid for 13 screens + 5 email templates + site map + design tokens |
+| ☁️ **[deployment-gcp.md](deployment-gcp.md)** | GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS + Terraform Cloud Run path) |
+| 📊 **[project-journal/](project-journal/)** | Weekly scrum · XP values · sprint backlog · burndown · per-sprint task boards |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ [weekly-scrum.md](project-journal/weekly-scrum.md) | 12 weeks of standup 3Qs per member |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ [xp-values.md](project-journal/xp-values.md) | Communication + Simplicity reflection |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ [sprint-backlog.csv](project-journal/sprint-backlog.csv) | 40 stories + 5 backlog items |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ [burndown.csv](project-journal/burndown.csv) | Velocity per sprint + daily burndown |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ [task-board.md](project-journal/task-board.md) | Index → [sprint-1](project-journal/task-board/sprint-1.md) · [2](project-journal/task-board/sprint-2.md) · [3](project-journal/task-board/sprint-3.md) · [4](project-journal/task-board/sprint-4.md) · [5](project-journal/task-board/sprint-5.md) · [6](project-journal/task-board/sprint-6.md) · [7](project-journal/task-board/sprint-7.md) |
+
+---
+
+---
+
 ## Team
 
 | Member | Role | GitHub |
