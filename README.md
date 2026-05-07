@@ -69,34 +69,46 @@ Per-service ownership table → [project-journal/task-board.md](project-journal/
 
 ---
 
-## Architecture (microservices)
+## Architecture (Component + Deployment diagrams)
 
+Full UML-style diagrams (component / deployment / sequence / ER / class) → **[`architecture.md`](architecture.md)**
+
+UI wireframes for every screen + email template wireframes → **[`wireframes.md`](wireframes.md)**
+
+### Component Diagram (high level)
+
+```mermaid
+flowchart LR
+    UI["💻 Browser\n(Next.js + Stripe Elements)"] --> NG["🌐 nginx\npath router"]
+    NG --> AU["api-auth"]
+    NG --> EV["api-events"]
+    NG --> TK["api-tickets"]
+    NG --> PY["api-payments"]
+    NG --> NO["api-notifications\n+ 12h reminder cron"]
+    NG --> AD["api-admin"]
+    TK -.->|"X-Internal-Secret"| PY
+    AU & EV & TK & PY & NO & AD --> DB[("Postgres 16\nCloud SQL")]
+    PY --> ST["Stripe API"]
+    TK & EV & NO & AD --> SMTP["Gmail SMTP"]
 ```
-Internet
-   │
-   ▼
-[Global HTTPS LB] 34.107.158.154.nip.io  (Google-managed TLS cert)
-   │
-   ▼
-[Backend Service] zestify-microsvc-svc → health check /api/health
-   │
-   ▼
-[MIG: zestify-microsvc-mig — regional us-west1]
-   ├── VM zestify-microsvc-A (us-west1-b)
-   │     └── Docker: nginx → routes /api/<svc>/* to upstream container
-   │              ├── api-auth          (port 5001)
-   │              ├── api-events        (port 5002)
-   │              ├── api-tickets       (port 5003)
-   │              ├── api-notifications (port 5004)  — runs 12h reminder cron
-   │              ├── api-admin         (port 5005)
-   │              ├── api-payments      (port 5006)
-   │              └── frontend          (port 3000)
-   └── VM zestify-microsvc-B (us-west1-c) — identical stack
-                              │
-                              ▼
-                       [Cloud SQL — Postgres 16]
-                              zestify-db
+
+### Deployment Diagram (GCP)
+
+```mermaid
+flowchart TB
+    U["🌍 User Browser"] -->|"HTTPS 443"| LB["Global HTTPS LB\n34.107.158.154.nip.io\n+ Google-managed SSL cert"]
+    LB --> MIG
+    subgraph MIG["📦 MIG zestify-microsvc-mig (us-west1, 2 × e2-medium)"]
+        VMA["VM-A us-west1-b\nDebian 12 + Docker\n8 containers"]
+        VMB["VM-B us-west1-c\nDebian 12 + Docker\n8 containers"]
+    end
+    MIG --> DB[("☁️ Cloud SQL\nPostgres 16\nzestify-db")]
+    MIG -.->|"docker pull"| AR["📦 Artifact Registry\n8 images"]
 ```
+
+> See [`architecture.md`](architecture.md) for the full UML component diagram, deployment
+> diagram with all GCP resources, 5 sequence diagrams (free ticket, Stripe purchase,
+> cancel, reschedule, 12h reminder), ER diagram, and design-pattern class diagram.
 
 ### Cross-service flow examples
 
@@ -191,6 +203,14 @@ CI builds 6 service images + nginx + frontend in parallel matrix, pushes to Arti
 
 ---
 
+## Diagrams & Wireframes
+
+| Doc | Contents |
+|-----|----------|
+| [`architecture.md`](architecture.md) | UML component diagram · deployment diagram (full GCP topology) · 5 sequence diagrams · ER diagram · design-pattern class diagram |
+| [`wireframes.md`](wireframes.md) | ASCII + Mermaid wireframes for all 13 screens + 5 email templates + site map + design tokens |
+| [`deployment-gcp.md`](deployment-gcp.md) | GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS) |
+
 ## Project Journal (course requirement)
 
 All project-management artefacts live under [`project-journal/`](project-journal/):
@@ -281,6 +301,8 @@ zestify/
 ├── nginx/                      # nginx.microsvc.conf + Dockerfile
 ├── terraform/                  # Modules + envs/{dev,prod}
 ├── scripts/                    # vm-startup.sh, deploy.sh, smoke.sh, ci-local.sh, tf_apply.sh
+├── architecture.md             # UML component + deployment + sequence + ER + class diagrams
+├── wireframes.md               # ASCII + Mermaid wireframes for every screen + email templates
 ├── deployment-gcp.md           # GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS)
 ├── project-journal/            # Weekly scrum + XP values + backlog + burndown + task board (per-sprint)
 ├── docker-compose.microsvc.yml # Local 8-container stack
