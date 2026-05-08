@@ -30,8 +30,8 @@ export default function LoginPage() {
         }
     };
 
-    const quickLogin = (email) => {
-        setEmail(email);
+    const quickLogin = (quickEmail) => {
+        setEmail(quickEmail);
         setPassword('password123');
     };
 
@@ -60,9 +60,9 @@ export default function LoginPage() {
 
                     <div className="auth-divider"><span>Quick Login</span></div>
                     <div className="quick-login-btns">
-                        <button className="btn btn-ghost btn-sm" onClick={() => quickLogin('admin@zestify.com')}>👑 Admin</button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => quickLogin('sarah@zestify.com')}>🎯 Organizer</button>
-                        <button className="btn btn-ghost btn-sm" onClick={() => quickLogin('alex@zestify.com')}>🎫 Attendee</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('kalharpatel10@gmail.com')}>👑 Admin</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('sohamrajjain0007@gmail.com')}>🎯 Organizer</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('nihardharmeshkumar.patel@sjsu.edu')}>🎫 Attendee</button>
                     </div>
 
                     <p className="auth-switch">
