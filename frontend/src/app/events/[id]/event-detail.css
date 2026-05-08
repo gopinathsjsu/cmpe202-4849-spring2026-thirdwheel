@@ -321,3 +321,12 @@
         font-size: 24px;
     }
 }
+
+/* Map embed polish — drop shadow on the OSM iframe + hover-brighten on the
+   "Open in Google Maps" overlay pill so the click affordance is obvious. */
+.event-detail-map iframe {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+}
+.event-detail-map a:hover span {
+    background: rgba(6, 182, 212, 0.9) !important;
+}

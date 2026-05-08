@@ -170,4 +170,14 @@ docker compose pull
 docker compose up -d
 
 docker compose ps
+
+# 6. Wait for nginx + report aggregate health so MIG sees the VM as live quickly.
+for i in $(seq 1 30); do
+    if curl -fsS http://localhost/api/health >/dev/null 2>&1; then
+        echo "==> $(date) /api/health OK after ${i} probe(s)"
+        break
+    fi
+    sleep 2
+done
+
 echo "==> $(date) startup complete"
