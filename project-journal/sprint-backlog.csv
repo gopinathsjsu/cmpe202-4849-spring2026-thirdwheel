@@ -1,46 +1,46 @@
 Sprint,Story ID,Story,Acceptance Criteria,Owner,Points,Status,Notes
-1,ZST-001,Initialize Node/Express + Next.js scaffolds,Repo runs `npm install` + `npm run dev` for both apps,Nihar+Kalhar,3,Done,W1 — landed Feb 15-18
-1,ZST-002,Postgres schema + seed (users / events / tickets / notifications / admin_actions),`node db/seed.js` creates 10 users + 13 events + tickets + notifications,Soham,5,Done,W1-W2
+1,ZST-001,Initialize Node/Express + Next.js scaffolds,Repo runs npm install + npm run dev for both apps,Nihar+Kalhar,3,Done,W1 — landed Feb 15-18
+1,ZST-002,Postgres schema + seed,node db/seed.js creates 10 users + 13 events + tickets + notifications,Soham,5,Done,W1-W2
 1,ZST-003,JWT auth middleware + role guard,/me round-trip works; RBAC blocks attendee from /admin,Soham,3,Done,W2-W3
-1,ZST-004,Event + ticket state machine,Illegal transitions throw HTTP 400 "Illegal status transition",Nihar,2,Done,W2
-2,ZST-005,Event repository + routes (list / detail / CRUD / attendees),GET /api/events?search=… returns paginated approved events,Nihar,8,Done,W3-W4
-2,ZST-006,Tickets routes (purchase / my-tickets / cancel) + TicketingService facade,POST /api/tickets creates ticket and emits TICKET_PURCHASED,Soham,5,Done,W4-W5
-2,ZST-007,Pluggable PaymentStrategy (Free / MockCard / Stripe stub),selectStrategy(0) returns FreeStrategy; (50) returns MockCardStrategy,Soham,3,Done,W4
-2,ZST-008,Moderation pipeline (CoR — Spam + CapacitySanity + TrustedOrganizer),"Title with ""free iPhone"" auto-rejects; capacity>100k rejects",Nihar,5,Done,W5
-2,ZST-009,Cache adapter (in-memory LRU + Redis read-through),`getCache().get/set/del` works for both adapters via env switch,Kalhar,3,Done,W5
-3,ZST-010,Email adapter (Ethereal + SMTP + Noop providers + templates),sendEmail returns {success: true} + ticket confirmation template renders,Kalhar,3,Done,W5
+1,ZST-004,Event + ticket state machine,Illegal transitions throw HTTP 400 Illegal status transition,Nihar,2,Done,W2
+2,ZST-005,Event repository + routes (list/detail/CRUD/attendees),GET /api/events?search=design returns paginated approved events,Nihar,8,Done,W3-W4
+2,ZST-006,Tickets routes + TicketingService facade,POST /api/tickets creates ticket and emits TICKET_PURCHASED,Soham,5,Done,W4-W5
+2,ZST-007,Pluggable PaymentStrategy (Free/MockCard/Stripe stub),selectStrategy(0) returns FreeStrategy; (50) returns MockCardStrategy,Soham,3,Done,W4
+2,ZST-008,Moderation pipeline (CoR Spam+CapacitySanity+TrustedOrganizer),Title with free iPhone auto-rejects; capacity>100k rejects,Nihar,5,Done,W5
+2,ZST-009,Cache adapter (in-memory LRU + Redis read-through),getCache get/set/del works for both adapters via env switch,Kalhar,3,Done,W5
+2,ZST-014,Domain event bus (Observer),emitDomain triggers all registered observers in process,Soham,2,Done,W4
+3,ZST-010,Email adapter (Ethereal/SMTP/Noop providers + templates),sendEmail returns success:true; ticket confirmation template renders,Kalhar,3,Done,W5
 3,ZST-011,Frontend landing + events listing pages,/ and /events render featured/listing without auth,Nihar,5,Done,W5-W6
-3,ZST-012,Frontend auth + dashboard (login / register / my-tickets),User can log in and see own tickets,Soham,5,Done,W6
+3,ZST-012,Frontend auth + dashboard (login/register/my-tickets),User can log in and see own tickets,Soham,5,Done,W6
 3,ZST-013,Frontend admin dashboard + notifications page,Admin sees moderation queue + user mgmt,Kalhar,5,Done,W6
-3,ZST-014,Domain event bus (Observer),emitDomain triggers all registered observers in process,Soham,2,Done,W4
-4,ZST-015,Backend Dockerfile + docker-compose stack (postgres+backend+frontend+seed),`docker compose up` brings up working stack,Kalhar,3,Done,W7
-4,ZST-016,Real Stripe SDK integration (PaymentIntent create + retrieve),POST /api/payments/intent returns valid clientSecret,Nihar,5,Done,W8
-4,ZST-017,Stripe Elements checkout on event detail page,Test card 4242 completes ticket purchase,Soham → Nihar,5,Done,W8
-4,ZST-018,Integration tests covering 24 API flows,`node --test tests/integration/api.test.js` green,Soham,5,Done,W8
-4,ZST-019,Partial unique index fix for ticket re-purchase after cancel,User can buy → cancel → re-buy same event without UNIQUE conflict,Soham,2,Done,W8
+4,ZST-015,Backend Dockerfile + docker-compose stack,docker compose up brings up working stack,Kalhar,3,Done,W7
+4,ZST-016,Real Stripe SDK (PaymentIntent create+retrieve),POST /api/payments/intent returns valid clientSecret,Nihar,5,Done,W8
+4,ZST-017,Stripe Elements checkout on event detail page,Test card 4242 completes ticket purchase,Soham+Nihar,5,Done,W8
+4,ZST-018,Integration tests covering 24 API flows,node --test tests/integration/api.test.js green,Soham,5,Done,W8
+4,ZST-019,Partial unique index for ticket re-purchase,User can buy then cancel then re-buy same event without UNIQUE conflict,Soham,2,Done,W8
 5,ZST-020,Microservice topology (nginx router + 8-container compose),Each /api/<svc>/* routes to its own container,Kalhar,5,Done,W7-W8
-5,ZST-021,Per-service folder refactor (services/{auth\,events\,tickets\,payments\,notifications\,admin}/),Each service has own server/routes/Dockerfile,All 3,8,Done,W9
-5,ZST-022,Cross-service Stripe verify (api-tickets → api-payments via HTTP + X-Internal-Secret),Stripe purchase succeeds end-to-end across services,Soham → Nihar,3,Done,W9
+5,ZST-021,Per-service folder refactor,Each service has own server/routes/Dockerfile,All 3,8,Done,W9
+5,ZST-022,Cross-service Stripe verify (api-tickets -> api-payments),Stripe purchase succeeds end-to-end across services,Soham+Nihar,3,Done,W9
 6,ZST-023,GitHub Actions CI/CD (matrix build + AR push + MIG rolling-restart),Push to main triggers full pipeline + deploys,Nihar,5,Done,W10
 6,ZST-024,GCP Compute MIG + Global HTTPS LB,2 VMs e2-medium serving 8 containers each via single LB IP,Nihar,8,Done,W10-W11
-6,ZST-025,Terraform infra modules (artifact_registry / cloud_sql / cloud_run / iam / storage / secrets),`terraform apply` provisions all GCP resources,All 3,8,Done,W11
+6,ZST-025,Terraform infra modules,terraform apply provisions all GCP resources,All 3,8,Done,W11
 6,ZST-026,Smoke + unit test suites,scripts/smoke.sh passes against live LB,Kalhar+Nihar,3,Done,W10
-7,ZST-027,Real Gmail SMTP + 5 email templates (confirm / cancel / reschedule / reminder / ticket-cancel),Email arrives in inbox on each domain event,Kalhar,5,Done,W12
-7,ZST-028,Role-aware event detail page (admin/organizer cancel + reschedule; attendee register),Different sidebar actions per role,Nihar,5,Done,W12
+7,ZST-027,Real Gmail SMTP + 5 email templates,Email arrives in inbox on each domain event,Kalhar,5,Done,W12
+7,ZST-028,Role-aware event detail page,Different sidebar actions per role,Nihar,5,Done,W12
 7,ZST-029,POST /api/events/:id/cancel + /reschedule with attendee emails,attendeesNotified count returned; tickets cascade-cancel,Nihar,5,Done,W12
-7,ZST-030,12h-before reminder cron loop in api-notifications,/api/notifications/_trigger-reminder sends emails to all upcoming attendees,Kalhar,3,Done,W12
-7,ZST-031,Google Maps location link button baked into all event emails,Email body has clickable "Open in Google Maps" linking to lat/lon,Kalhar,2,Done,W12
-7,ZST-032,Demo accounts mapped to team Gmails + display names,Login as kalhar@/soham@/nihar@ shows correct name + role,Kalhar+Soham,2,Done,W12
-7,ZST-033,Quick-login buttons on /login auto-fill team credentials,One click pre-fills email+password fields,Soham,1,Done,W12
-7,ZST-034,HTTPS via Google-managed cert (34.107.158.154.nip.io),"Cert ACTIVE; https:// returns 200, valid lock icon",Nihar,3,Done,W12
-7,ZST-035,Stripe Elements paymentReady gate fix,No "Element not mounted" error on rapid submit,Nihar,2,Done,W12
-7,ZST-036,Events-grid CSS fix (move from home.css to events.css),/events renders 3-column grid even on direct landing,Nihar,1,Done,W12
-7,ZST-037,Real-time counter — 2s cache TTL + invalidate-on-write,Spots-left counter updates within seconds across both VMs,Nihar+Soham,2,Done,W12
-7,ZST-038,10-char ticket code from unambiguous alphabet + retry on UNIQUE collision,No 0/1/I/L/O in codes; collision auto-retries,Soham,1,Done,W12
-7,ZST-039,Observer hardening — per-attendee try/catch + log success counts,One failed email send doesn't abort the rest,Nihar,1,Done,W12
-7,ZST-040,Project journal + weekly scrum + XP values + burndown,docs/project-journal/* committed,Soham+Kalhar,2,Done,W12
+7,ZST-030,12h-before reminder cron loop,/api/notifications/_trigger-reminder sends emails to all upcoming attendees,Kalhar,3,Done,W12
+7,ZST-031,Google Maps location link in event emails,Email body has clickable Open in Google Maps linking to lat/lon,Kalhar,2,Done,W12
+7,ZST-032,Demo accounts mapped to team Gmails,Login as kalhar/soham/nihar shows correct name + role,Kalhar+Soham,2,Done,W12
+7,ZST-033,Quick-login buttons on /login auto-fill,One click pre-fills email+password fields,Soham,1,Done,W12
+7,ZST-034,HTTPS via Google-managed cert (nip.io),Cert ACTIVE; https:// returns 200 valid lock icon,Nihar,3,Done,W12
+7,ZST-035,Stripe Elements paymentReady gate fix,No Element not mounted error on rapid submit,Nihar,2,Done,W12
+7,ZST-036,Events-grid CSS fix (move home.css -> events.css),/events renders 3-column grid even on direct landing,Nihar,1,Done,W12
+7,ZST-037,Real-time counter (2s cache TTL + invalidate-on-write),Spots-left counter updates within seconds across both VMs,Nihar+Soham,2,Done,W12
+7,ZST-038,10-char ticket code unambiguous alphabet + retry,No 0/1/I/L/O in codes; collision auto-retries,Soham,1,Done,W12
+7,ZST-039,Observer hardening (per-attendee try/catch + log counts),One failed email send doesn't abort the rest,Nihar,1,Done,W12
+7,ZST-040,Project journal + weekly scrum + XP values + burndown,project-journal/* committed,Soham+Kalhar,2,Done,W12
 Backlog,ZST-041,Cloud SQL Auth Proxy + IAM-based DB auth,Service accounts connect without static passwords,—,5,Backlog,Post-class
-Backlog,ZST-042,Stripe webhook for async PaymentIntent events,Refund event triggers ticket status='refunded',—,3,Backlog,Post-class
+Backlog,ZST-042,Stripe webhook for async PaymentIntent events,Refund event triggers ticket status=refunded,—,3,Backlog,Post-class
 Backlog,ZST-043,Redis cache for multi-VM coherence,Spots-left counter eliminates 2s window,—,3,Backlog,Post-class
 Backlog,ZST-044,Cloud Scheduler-driven reminder cron,Replace in-process loop with managed scheduler,—,2,Backlog,Post-class
-Backlog,ZST-045,Frontend FSD reorganization (features/ + shared/),Each feature self-contained,—,5,Backlog,Post-class
+Backlog,ZST-045,Frontend FSD reorganization,Each feature self-contained,—,5,Backlog,Post-class

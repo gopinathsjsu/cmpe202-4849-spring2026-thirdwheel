@@ -1,0 +1,37 @@
+Week,Window,Member,Worked On,Planning Next,Blocked On
+1,Feb 15 - Feb 21,Nihar,Repo init + README + .gitignore; Next.js+React 19 scaffold; lockfile + config,Domain state machine; Google Calendar URL + ICS utility,Waiting on Soham Postgres schema
+1,Feb 15 - Feb 21,Soham,CMPE 202 dependency requirements doc,Postgres schema; validate middleware; user repository,Waiting on Kalhar pg pool helper
+1,Feb 15 - Feb 21,Kalhar,Node/Express scaffold + lockfile + .dockerignore,pg pool + transaction helper; async + error middleware; rich seed data,Need Soham schema first
+2,Feb 22 - Feb 28,Nihar,Event + ticket state-machine module; category repo scaffold,Event repository with filters/pagination; events routes,Awaiting Soham user repo for organizer enrichment
+2,Feb 22 - Feb 28,Soham,Postgres schema baseline; validate middleware; user repository,Auth middleware (JWT) + role guard; auth routes; domain event bus,—
+2,Feb 22 - Feb 28,Kalhar,pg pool + transaction helper; async + error middleware; rich seed data,Admin repo (audit log + dashboard stats); admin routes,—
+3,Mar 1 - Mar 7,Nihar,Category repo; event repo design,Event repository; calendar utils; EventService,Waiting on Soham auth middleware for requireRole
+3,Mar 1 - Mar 7,Soham,User repo; JWT auth middleware + role guard; auth routes,Ticket repository; payment strategy; domain event bus,Need Nihar StateMachine for assertTicketTransition
+3,Mar 1 - Mar 7,Kalhar,Admin actions audit log + dashboard stats repo,Admin moderation + user mgmt routes; email adapter; cache adapter,—
+4,Mar 8 - Mar 14,Nihar,Event repo with filters/pagination; calendar utils; events routes; EventService,Moderation pipeline (Chain of Responsibility),Need Soham domain event bus
+4,Mar 8 - Mar 14,Soham,In-process domain event bus; pluggable PaymentStrategy,Ticket repo; tickets routes; TicketingService facade,Waiting on Kalhar email + notification repos
+4,Mar 8 - Mar 14,Kalhar,Admin routes; organizer routes; email adapter; storage adapter,Notification repo; notifications routes; observers wiring,Need Soham tickets observer registration
+5,Mar 15 - Mar 21,Nihar,EventService; moderation pipeline,Frontend landing + EventCard + events listing,Need Soham API client before pages can fetch
+5,Mar 15 - Mar 21,Soham,Ticket repo; tickets routes; TicketingService facade,Frontend login/register/dashboard; API client; auth context + toast,Waiting on Nihar home/event pages for shared navbar
+5,Mar 15 - Mar 21,Kalhar,Cache adapter; notification repo,Express server bootstrap; observers wiring,—
+6,Mar 22 - Mar 28,Nihar,Frontend landing + EventCard + events listing; event detail draft,Event detail with OSM embed; event creation; backend Dockerfile,Awaiting Soham API client + auth context
+6,Mar 22 - Mar 28,Soham,Frontend API client; JWT auth context + toast; login + register; Navbar + Footer,My-tickets page; dashboard CSS; integration tests,—
+6,Mar 22 - Mar 28,Kalhar,Server bootstrap; observers wiring; notifications routes; backend Dockerfile,Docker Compose stack; admin dashboard page; notifications page,Waiting on Nihar frontend Dockerfile
+7,Mar 29 - Apr 4,Nihar,Event detail page; event creation with Google Maps link parsing,Stripe SDK adapter; /api/payments/intent endpoint,Need Soham PaymentStrategy to accept paymentIntentId
+7,Mar 29 - Apr 4,Soham,My-tickets page + dashboard CSS; partial unique index migration,Real Stripe verification; Stripe Elements checkout,Awaiting Nihar Stripe adapter for PI.retrieve
+7,Mar 29 - Apr 4,Kalhar,Docker Compose stack; admin page; notifications page,Per-service Dockerfile pattern; nginx microsvc router; 8-container compose,—
+8,Apr 5 - Apr 11,Nihar,Stripe SDK adapter; /api/payments/intent endpoint,Frontend Stripe Elements checkout; integration tests for Stripe,—
+8,Apr 5 - Apr 11,Soham,Real Stripe verification in PaymentStrategy; 24 integration tests,Cross-service Stripe verify (api-tickets -> api-payments),Need Nihar per-service folder refactor
+8,Apr 5 - Apr 11,Kalhar,Per-service Dockerfiles; nginx microsvc router; docker-compose.microsvc.yml,Per-service refactor split,—
+9,Apr 12 - Apr 18,Nihar,Frontend Stripe Elements checkout; EventService refactor for per-service,GitHub Actions CI/CD; GCP deployment guide; deploy.sh,Awaiting Kalhar per-service admin+notifications refactor
+9,Apr 12 - Apr 18,Soham,Cross-service Stripe verify; auth + tickets services split out,Unit tests; smoke + integration tests for new microservice topology,—
+9,Apr 12 - Apr 18,Kalhar,Refactored admin + notifications services; shared/ module structure,VM startup script; instance template + MIG provisioning notes,Waiting on Nihar CI workflow
+10,Apr 19 - Apr 25,Nihar,CI/CD workflow; deploy.sh; GCP deploy guide; VM startup script + instance template,Jenkins-in-Docker; Terraform root + AR + cloud_run_frontend modules,—
+10,Apr 19 - Apr 25,Soham,Unit tests; smoke test script; integration tests vs nginx microsvc stack,Terraform cloud_sql + secrets; envs/dev composition; tf_apply.sh,Waiting on Kalhar iam module
+10,Apr 19 - Apr 25,Kalhar,Terraform cloud_run_backend + storage + iam; envs/prod composition,Terraform outputs + variables + tfvars.example,—
+11,Apr 26 - May 3,Nihar,Jenkinsfile + jenkins compose; Terraform root + AR + cloud_run_frontend,Migrate seed users to team Gmails; HTTPS LB; role-aware event detail,Need Kalhar reminder cron + email templates first
+11,Apr 26 - May 3,Soham,Terraform cloud_sql + secrets; envs/dev composition; tf_apply.sh; ticket repurchase fix,API client events.cancel/reschedule; quick-login buttons,Waiting on Nihar role-aware page shell
+11,Apr 26 - May 3,Kalhar,Terraform outputs + variables + tfvars.example + envs/prod composition,Real Gmail SMTP; 4 new email templates; 12h reminder cron loop,Need Soham EVENT_CANCELLED/EVENT_RESCHEDULED event types
+12,May 4 - May 10,Nihar,EventService cancel/reschedule; events routes for cancel/reschedule; events observers; role-aware page + RescheduleModal; VM SMTP env; HTTPS LB; events-grid CSS fix; Stripe paymentReady gate; lower cache TTLs; per-attendee try/catch,Final E2E demo prep; documentation pass,—
+12,May 4 - May 10,Soham,3 new domain event types; tickets observer ticket-cancellation; API client cancel/reschedule; quick-login buttons; 10-char ticket code with retry; cache invalidate on ticket cancel; refund eligibility; password validator,Project journal docs; weekly scrum; XP values,—
+12,May 4 - May 10,Kalhar,Real Gmail SMTP + 4 new templates; Google Maps link helper in event emails; demo accounts migration + display names; 12h reminder cron loop; idempotent schema migrations; notification dedup; admin CSV export; email digest builder,Sprint backlog spreadsheet; burndown chart; final journal entries,—
