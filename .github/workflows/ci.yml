@@ -6,6 +6,11 @@ on:
   pull_request:
     branches: [main]
 
+# Cancel any in-flight run on the same ref when a new push lands.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   GCP_PROJECT: healthy-mender-491009-b4
   GCP_REGION: us-west1
