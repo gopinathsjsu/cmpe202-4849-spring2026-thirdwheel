@@ -121,12 +121,20 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
       - uses: google-github-actions/setup-gcloud@v2
       - run: gcloud auth configure-docker ${GCP_REGION}-docker.pkg.dev --quiet
-      - name: build + push backend
+      - name: build + push backend (single image, fanned-out to 6 api-* tags)
         run: |
           SHA=${GITHUB_SHA::7}
+          # vm-startup.sh expects per-service images (api-auth, api-events, ...).
+          # Same image, different repo tags — SERVICE env picks routes at runtime.
           docker buildx build --platform linux/amd64 \
             -t ${REGISTRY}/backend:${SHA} \
             -t ${REGISTRY}/backend:microsvc \
+            -t ${REGISTRY}/api-auth:latest \
+            -t ${REGISTRY}/api-events:latest \
+            -t ${REGISTRY}/api-tickets:latest \
+            -t ${REGISTRY}/api-payments:latest \
+            -t ${REGISTRY}/api-notifications:latest \
+            -t ${REGISTRY}/api-admin:latest \
             --push ./backend
       - name: build + push nginx
         run: |
