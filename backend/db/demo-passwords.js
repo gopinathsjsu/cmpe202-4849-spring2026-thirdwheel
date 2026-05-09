@@ -107,10 +107,34 @@ async function seedDummyRegistrations() {
     }
 }
 
+async function reassignEventsToOrganizer() {
+    // After the email/name swap, events.organizer_id may still point to the
+    // user row that now holds the attendee identity (Soham). Move every
+    // event owned by Soham → Nihar so organizer_name renders correctly.
+    // Attendee role can't legitimately own events (RBAC blocks create) so
+    // this is safe to run every boot.
+    try {
+        const soham = await query("SELECT id, role FROM users WHERE email = 'sohamrajjain0007@gmail.com'");
+        const nihar = await query("SELECT id, role FROM users WHERE email = 'nihardharmeshkumar.patel@sjsu.edu'");
+        if (!soham.rows.length || !nihar.rows.length) return;
+        if (soham.rows[0].role !== 'attendee' || nihar.rows[0].role !== 'organizer') return;
+        const r = await query(
+            'UPDATE events SET organizer_id = $1 WHERE organizer_id = $2 RETURNING id',
+            [nihar.rows[0].id, soham.rows[0].id]
+        );
+        if (r.rows.length) {
+            console.log(`[demo-passwords] reassigned ${r.rows.length} event(s) from Soham → Nihar`);
+        }
+    } catch (err) {
+        console.error('[demo-passwords] reassignEventsToOrganizer failed:', err.message);
+    }
+}
+
 async function runDemoSeeds() {
     await resetDemoPasswords();
     await seedDummyUsers();
+    await reassignEventsToOrganizer();
     await seedDummyRegistrations();
 }
 
-module.exports = { resetDemoPasswords, seedDummyUsers, seedDummyRegistrations, runDemoSeeds };
+module.exports = { resetDemoPasswords, seedDummyUsers, seedDummyRegistrations, reassignEventsToOrganizer, runDemoSeeds };
