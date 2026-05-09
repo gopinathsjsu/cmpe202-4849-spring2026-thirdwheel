@@ -27,14 +27,19 @@ async function login(email, password) {
     return r.body.token;
 }
 
-// Team demo accounts use email as password; other seed users keep 'password123'.
+// Demo convention: password = email for every demo account (team gmails +
+// any @zestify.com). Other domains (real signups) keep 'password123' in tests.
 const PASS = 'password123';
 const TEAM_EMAILS = new Set([
     'kalharpatel10@gmail.com',
     'nihardharmeshkumar.patel@sjsu.edu',
     'sohamrajjain0007@gmail.com',
 ]);
-function passFor(email) { return TEAM_EMAILS.has(email) ? email : PASS; }
+function passFor(email) {
+    if (TEAM_EMAILS.has(email)) return email;
+    if (email.endsWith('@zestify.com')) return email;
+    return PASS;
+}
 
 test('GET /healthz returns ok', async () => {
     const r = await api('/healthz');
@@ -110,7 +115,7 @@ test('Auth: login + me round-trip', async () => {
 });
 
 test('RBAC: attendee blocked from /api/admin/stats', async () => {
-    const token = await login('chris@zestify.com', PASS);
+    const token = await login('chris@zestify.com', passFor('chris@zestify.com'));
     const r = await api('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 403);
 });
@@ -131,7 +136,7 @@ test('Admin: list pending events', async () => {
 
 test('Tickets: full purchase + cancel + repurchase round-trip (no unique-key conflict)', async () => {
     // Use lisa who has no seeded tickets; pick a free, available event.
-    const token = await login('lisa@zestify.com', PASS);
+    const token = await login('lisa@zestify.com', passFor('lisa@zestify.com'));
     // Find a free event lisa has no ticket for.
     const events = await api('/api/events?limit=20');
     const candidate = events.body.events.find(e => e.price === 0 && e.spots_left > 0);
@@ -248,7 +253,7 @@ test('Stripe: PaymentIntent rejected for free event', async () => {
 
 test('Stripe: ticket purchase requires paymentIntentId for stripe method', async () => {
     // Use a user with no existing ticket on the chosen paid event so the dedupe check passes.
-    const token = await login('lisa@zestify.com', PASS);
+    const token = await login('lisa@zestify.com', passFor('lisa@zestify.com'));
     const events = await api('/api/events?limit=20');
     const my = await api('/api/tickets/my', { headers: { Authorization: `Bearer ${token}` } });
     const ownedEventIds = new Set((my.body.tickets || []).filter(t => t.status !== 'cancelled').map(t => t.event_id));
