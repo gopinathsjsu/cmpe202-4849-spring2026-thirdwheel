@@ -151,16 +151,9 @@ BEGIN
   END IF;
 END $$;
 
--- Team accounts: password = email (matches dummy user convention for easy demo login).
--- pgcrypto crypt() with bf salt produces $2a$ hashes compatible with bcryptjs.
--- Run AFTER defensive swap so the correct user gets the correct password.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-UPDATE users SET password = crypt('kalharpatel10@gmail.com', gen_salt('bf', 10))
-  WHERE email = 'kalharpatel10@gmail.com';
-UPDATE users SET password = crypt('nihardharmeshkumar.patel@sjsu.edu', gen_salt('bf', 10))
-  WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
-UPDATE users SET password = crypt('sohamrajjain0007@gmail.com', gen_salt('bf', 10))
-  WHERE email = 'sohamrajjain0007@gmail.com';
+-- Team passwords (email = password) are reset in Node post-migrate
+-- (see db/demo-passwords.js) — Cloud SQL `zestify` user lacks
+-- CREATE EXTENSION pgcrypto permission, so SQL-side crypt() fails silently.
 
 -- Repair events.tickets_sold drift — authoritative recompute from tickets table.
 UPDATE events e
