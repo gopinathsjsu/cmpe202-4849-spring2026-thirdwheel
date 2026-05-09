@@ -61,8 +61,8 @@ export default function LoginPage() {
                     <div className="auth-divider"><span>Quick Login</span></div>
                     <div className="quick-login-btns">
                         <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('kalharpatel10@gmail.com')}>👑 Admin</button>
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('sohamrajjain0007@gmail.com')}>🎯 Organizer</button>
-                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('nihardharmeshkumar.patel@sjsu.edu')}>🎫 Attendee</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('nihardharmeshkumar.patel@sjsu.edu')}>🎯 Organizer</button>
+                        <button type="button" className="btn btn-ghost btn-sm" onClick={() => quickLogin('sohamrajjain0007@gmail.com')}>🎫 Attendee</button>
                     </div>
 
                     <p className="auth-switch">

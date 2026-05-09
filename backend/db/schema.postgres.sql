@@ -115,16 +115,18 @@ ALTER TABLE notifications ADD CONSTRAINT notifications_type_check
   CHECK (type IN ('info','success','warning','error','event_reminder','ticket_confirmation','event_approved','event_rejected','event_cancelled','event_rescheduled','ticket_cancelled'));
 
 -- Demo accounts — team member emails wired into seed users (idempotent).
+-- Drop any pre-existing user that claimed the SJSU email so the organizer seed can take it.
 DELETE FROM tickets WHERE user_id IN (SELECT id FROM users WHERE email = 'nihardharmeshkumar.patel@sjsu.edu' AND name = 'Nihar Tester');
 DELETE FROM notifications WHERE user_id IN (SELECT id FROM users WHERE email = 'nihardharmeshkumar.patel@sjsu.edu' AND name = 'Nihar Tester');
 DELETE FROM users WHERE email = 'nihardharmeshkumar.patel@sjsu.edu' AND name = 'Nihar Tester';
 UPDATE users SET email = 'kalharpatel10@gmail.com' WHERE email = 'admin@zestify.com';
-UPDATE users SET email = 'sohamrajjain0007@gmail.com' WHERE email = 'elena@zestify.com';
-UPDATE users SET email = 'nihardharmeshkumar.patel@sjsu.edu' WHERE email = 'alex@zestify.com';
+-- Nihar = organizer demo, Soham = attendee demo (Kalhar = admin demo)
+UPDATE users SET email = 'nihardharmeshkumar.patel@sjsu.edu' WHERE email = 'elena@zestify.com';
+UPDATE users SET email = 'sohamrajjain0007@gmail.com' WHERE email = 'alex@zestify.com';
 -- Rename to team member display names.
 UPDATE users SET name = 'Kalhar Patel'   WHERE email = 'kalharpatel10@gmail.com';
-UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 UPDATE users SET name = 'Nihar Patel'    WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
+UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 
 -- Repair events.tickets_sold drift — authoritative recompute from tickets table.
 UPDATE events e

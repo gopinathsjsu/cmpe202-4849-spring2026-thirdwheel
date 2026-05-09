@@ -235,7 +235,7 @@ The full smoke suite covers:
 SK="sk_test_..."
 BASE="https://34.107.158.154.nip.io"
 TOKEN=$(curl -sS -H 'Content-Type: application/json' \
-  -d '{"email":"nihardharmeshkumar.patel@sjsu.edu","password":"password123"}' \
+  -d '{"email":"sohamrajjain0007@gmail.com","password":"password123"}' \
   "$BASE/api/auth/login" | jq -r .token)
 
 # 1. Create PaymentIntent.

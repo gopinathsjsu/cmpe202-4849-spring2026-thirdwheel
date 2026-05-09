@@ -50,9 +50,9 @@ documented trade-off (in-memory ≠ shared state).
 
 ```json
 {
-  "id": 6,
+  "id": 4,
   "email": "nihardharmeshkumar.patel@sjsu.edu",
-  "role": "attendee",
+  "role": "organizer",
   "name": "Nihar Patel",
   "iat": 1778442708,
   "exp": 1779047508
@@ -116,8 +116,8 @@ fields with one of the team's seeded accounts:
 | Button | Email | Role |
 |--------|-------|------|
 | 👑 Admin | `kalharpatel10@gmail.com` | admin |
-| 🎯 Organizer | `sohamrajjain0007@gmail.com` | organizer |
-| 🎫 Attendee | `nihardharmeshkumar.patel@sjsu.edu` | attendee |
+| 🎯 Organizer | `nihardharmeshkumar.patel@sjsu.edu` | organizer |
+| 🎫 Attendee | `sohamrajjain0007@gmail.com` | attendee |
 
 All three share password `password123`. **Demo only** — wired up via an
 idempotent migration in `shared/db/schema.postgres.sql` that swaps seed user

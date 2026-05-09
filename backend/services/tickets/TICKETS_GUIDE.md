@@ -79,7 +79,7 @@ BASE="https://34.107.158.154.nip.io"
 
 # 1. Login.
 TOKEN=$(curl -sS -H 'Content-Type: application/json' \
-  -d '{"email":"nihardharmeshkumar.patel@sjsu.edu","password":"password123"}' \
+  -d '{"email":"sohamrajjain0007@gmail.com","password":"password123"}' \
   "$BASE/api/auth/login" | jq -r .token)
 
 # 2. Create PaymentIntent.

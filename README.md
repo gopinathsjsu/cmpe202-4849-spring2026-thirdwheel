@@ -162,8 +162,8 @@ flowchart TB
 | Role | Email | Quick-Login Button |
 |------|-------|--------------------|
 | **Admin** — Kalhar | `kalharpatel10@gmail.com` | 👑 Admin |
-| **Organizer** — Soham | `sohamrajjain0007@gmail.com` | 🎯 Organizer |
-| **Attendee** — Nihar | `nihardharmeshkumar.patel@sjsu.edu` | 🎫 Attendee |
+| **Organizer** — Nihar | `nihardharmeshkumar.patel@sjsu.edu` | 🎯 Organizer |
+| **Attendee** — Soham | `sohamrajjain0007@gmail.com` | 🎫 Attendee |
 
 Password for all three: `password123`
 
