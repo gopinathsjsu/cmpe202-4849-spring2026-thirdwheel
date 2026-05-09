@@ -128,6 +128,16 @@ UPDATE users SET name = 'Kalhar Patel'   WHERE email = 'kalharpatel10@gmail.com'
 UPDATE users SET name = 'Nihar Patel'    WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
 UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 
+-- Team accounts: password = email (matches dummy user convention for easy demo login).
+-- pgcrypto crypt() with bf salt produces $2a$ hashes compatible with bcryptjs.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+UPDATE users SET password = crypt('kalharpatel10@gmail.com', gen_salt('bf', 10))
+  WHERE email = 'kalharpatel10@gmail.com';
+UPDATE users SET password = crypt('nihardharmeshkumar.patel@sjsu.edu', gen_salt('bf', 10))
+  WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
+UPDATE users SET password = crypt('sohamrajjain0007@gmail.com', gen_salt('bf', 10))
+  WHERE email = 'sohamrajjain0007@gmail.com';
+
 -- Defensive role correction — covers prod DBs that ran the OLD mapping where
 -- Soham got the organizer slot and Nihar got the attendee slot. Swap them
 -- by current role so Nihar = organizer, Soham = attendee regardless of prior state.

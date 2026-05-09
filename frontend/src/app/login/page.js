@@ -32,7 +32,8 @@ export default function LoginPage() {
 
     const quickLogin = (quickEmail) => {
         setEmail(quickEmail);
-        setPassword('password123');
+        // Demo convention: password = email for all seeded accounts.
+        setPassword(quickEmail);
     };
 
     return (

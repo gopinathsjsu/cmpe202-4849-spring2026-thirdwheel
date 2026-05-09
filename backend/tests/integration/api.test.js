@@ -27,7 +27,14 @@ async function login(email, password) {
     return r.body.token;
 }
 
+// Team demo accounts use email as password; other seed users keep 'password123'.
 const PASS = 'password123';
+const TEAM_EMAILS = new Set([
+    'kalharpatel10@gmail.com',
+    'nihardharmeshkumar.patel@sjsu.edu',
+    'sohamrajjain0007@gmail.com',
+]);
+function passFor(email) { return TEAM_EMAILS.has(email) ? email : PASS; }
 
 test('GET /healthz returns ok', async () => {
     const r = await api('/healthz');
@@ -96,7 +103,7 @@ test('Auth: login bad password rejected', async () => {
 });
 
 test('Auth: login + me round-trip', async () => {
-    const token = await login('kalharpatel10@gmail.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', passFor('kalharpatel10@gmail.com'));
     const r = await api('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.equal(r.body.user.role, 'admin');
@@ -109,14 +116,14 @@ test('RBAC: attendee blocked from /api/admin/stats', async () => {
 });
 
 test('Admin: stats endpoint works', async () => {
-    const token = await login('kalharpatel10@gmail.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', passFor('kalharpatel10@gmail.com'));
     const r = await api('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok(r.body.stats.totalUsers > 0);
 });
 
 test('Admin: list pending events', async () => {
-    const token = await login('kalharpatel10@gmail.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', passFor('kalharpatel10@gmail.com'));
     const r = await api('/api/admin/events?status=pending', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok(Array.isArray(r.body.events));
@@ -155,7 +162,7 @@ test('Tickets: full purchase + cancel + repurchase round-trip (no unique-key con
 });
 
 test('Notifications: list returns shape', async () => {
-    const token = await login('sohamrajjain0007@gmail.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', passFor('sohamrajjain0007@gmail.com'));
     const r = await api('/api/notifications?limit=5', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok('unreadCount' in r.body);
@@ -163,7 +170,7 @@ test('Notifications: list returns shape', async () => {
 });
 
 test('Moderation pipeline: spam keywords auto-rejected on create', async () => {
-    const token = await login('nihardharmeshkumar.patel@sjsu.edu', PASS);
+    const token = await login('nihardharmeshkumar.patel@sjsu.edu', passFor('nihardharmeshkumar.patel@sjsu.edu'));
     const r = await api('/api/events', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -179,7 +186,7 @@ test('Moderation pipeline: spam keywords auto-rejected on create', async () => {
 });
 
 test('Moderation pipeline: capacity > 100k auto-rejected', async () => {
-    const token = await login('nihardharmeshkumar.patel@sjsu.edu', PASS);
+    const token = await login('nihardharmeshkumar.patel@sjsu.edu', passFor('nihardharmeshkumar.patel@sjsu.edu'));
     const r = await api('/api/events', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -194,7 +201,7 @@ test('Moderation pipeline: capacity > 100k auto-rejected', async () => {
 });
 
 test('State machine: re-approve already approved fails', async () => {
-    const token = await login('kalharpatel10@gmail.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', passFor('kalharpatel10@gmail.com'));
     const r = await api('/api/admin/events/1/approve', {
         method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: {},
     });
@@ -211,7 +218,7 @@ test('Unknown route returns 404', async () => {
 });
 
 test('Stripe: PaymentIntent created for paid event', { skip: !process.env.STRIPE_SECRET_KEY ? 'STRIPE_SECRET_KEY not set' : false }, async () => {
-    const token = await login('sohamrajjain0007@gmail.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', passFor('sohamrajjain0007@gmail.com'));
     const events = await api('/api/events?limit=20');
     const paid = events.body.events.find(e => e.price > 0);
     assert.ok(paid, 'no paid event seeded');
@@ -227,7 +234,7 @@ test('Stripe: PaymentIntent created for paid event', { skip: !process.env.STRIPE
 });
 
 test('Stripe: PaymentIntent rejected for free event', async () => {
-    const token = await login('sohamrajjain0007@gmail.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', passFor('sohamrajjain0007@gmail.com'));
     const events = await api('/api/events?limit=20');
     const free = events.body.events.find(e => e.price === 0);
     const r = await api('/api/payments/intent', {

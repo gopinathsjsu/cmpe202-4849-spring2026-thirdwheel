@@ -165,7 +165,7 @@ flowchart TB
 | **Organizer** — Nihar | `nihardharmeshkumar.patel@sjsu.edu` | 🎯 Organizer |
 | **Attendee** — Soham | `sohamrajjain0007@gmail.com` | 🎫 Attendee |
 
-Password for all three: `password123`
+Password for team accounts: **same as the email** (e.g., `kalharpatel10@gmail.com`). Other seed users (alex/maya/etc. → renamed) still use `password123`. Dummy users (`priya@`, `ravi@` …): password = email.
 
 Click the appropriate Quick-Login button on the `/login` page → fields auto-fill → click Sign In.
 

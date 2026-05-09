@@ -119,6 +119,6 @@ fields with one of the team's seeded accounts:
 | 🎯 Organizer | `nihardharmeshkumar.patel@sjsu.edu` | organizer |
 | 🎫 Attendee | `sohamrajjain0007@gmail.com` | attendee |
 
-All three share password `password123`. **Demo only** — wired up via an
+Team accounts: password = email itself (e.g., `kalharpatel10@gmail.com` / `kalharpatel10@gmail.com`). **Demo only** — wired up via an
 idempotent migration in `shared/db/schema.postgres.sql` that swaps seed user
 emails to the team's real Gmail addresses on every container start.
