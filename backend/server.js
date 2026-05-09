@@ -26,7 +26,10 @@ app.use(helmet({ contentSecurityPolicy: false, crossOriginResourcePolicy: false 
 app.use(compression());
 app.use(pinoHttp({ logger }));
 
-const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:3000,http://localhost:3001,http://localhost:5001')
+// Default allowlist covers local dev + prod LB nip.io domain. Env override
+// (CORS_ORIGINS) takes precedence when set.
+const allowedOrigins = (process.env.CORS_ORIGINS
+    || 'http://localhost:3000,http://localhost:3001,http://localhost:5001,https://34.107.158.154.nip.io,http://34.107.158.154.nip.io')
     .split(',').map(s => s.trim()).filter(Boolean);
 app.use(cors({
     origin: (origin, cb) => {
