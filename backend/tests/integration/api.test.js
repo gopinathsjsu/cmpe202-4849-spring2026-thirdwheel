@@ -91,12 +91,12 @@ test('Auth: register validates input', async () => {
 });
 
 test('Auth: login bad password rejected', async () => {
-    const r = await api('/api/auth/login', { method: 'POST', body: { email: 'admin@zestify.com', password: 'wrong' } });
+    const r = await api('/api/auth/login', { method: 'POST', body: { email: 'kalharpatel10@gmail.com', password: 'wrong' } });
     assert.equal(r.status, 401);
 });
 
 test('Auth: login + me round-trip', async () => {
-    const token = await login('admin@zestify.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', PASS);
     const r = await api('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.equal(r.body.user.role, 'admin');
@@ -109,14 +109,14 @@ test('RBAC: attendee blocked from /api/admin/stats', async () => {
 });
 
 test('Admin: stats endpoint works', async () => {
-    const token = await login('admin@zestify.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', PASS);
     const r = await api('/api/admin/stats', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok(r.body.stats.totalUsers > 0);
 });
 
 test('Admin: list pending events', async () => {
-    const token = await login('admin@zestify.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', PASS);
     const r = await api('/api/admin/events?status=pending', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok(Array.isArray(r.body.events));
@@ -194,7 +194,7 @@ test('Moderation pipeline: capacity > 100k auto-rejected', async () => {
 });
 
 test('State machine: re-approve already approved fails', async () => {
-    const token = await login('admin@zestify.com', PASS);
+    const token = await login('kalharpatel10@gmail.com', PASS);
     const r = await api('/api/admin/events/1/approve', {
         method: 'PUT', headers: { Authorization: `Bearer ${token}` }, body: {},
     });
