@@ -15,6 +15,8 @@ export default function AdminPage() {
     const [stats, setStats] = useState(null);
     const [pendingEvents, setPendingEvents] = useState([]);
     const [usersList, setUsersList] = useState([]);
+    const [usersTotal, setUsersTotal] = useState(0);
+    const [pendingTotal, setPendingTotal] = useState(0);
     const [loading, setLoading] = useState(true);
 
     // Route guard: only admin can access this page
@@ -33,14 +35,18 @@ export default function AdminPage() {
     const loadData = async () => {
         setLoading(true);
         try {
+            // Pull full user list (limit=1000) so tab label + table reflect the real total
+            // instead of one page of 20.
             const [s, e, u] = await Promise.all([
                 adminApi.stats(),
                 adminApi.pendingEvents(),
-                adminApi.users(),
+                adminApi.users({ limit: 1000 }),
             ]);
             setStats(s.stats);
             setPendingEvents(e.events);
+            setPendingTotal(e.pagination?.total ?? e.events.length);
             setUsersList(u.users);
+            setUsersTotal(u.pagination?.total ?? u.users.length);
         } catch (err) {
             console.error(err);
         } finally {
@@ -142,10 +148,10 @@ export default function AdminPage() {
                 {/* Tabs */}
                 <div className="dashboard-tabs">
                     <button className={`dashboard-tab ${tab === 'events' ? 'active' : ''}`} onClick={() => setTab('events')}>
-                        ⏳ Pending Events ({pendingEvents.length})
+                        ⏳ Pending Events ({pendingTotal})
                     </button>
                     <button className={`dashboard-tab ${tab === 'users' ? 'active' : ''}`} onClick={() => setTab('users')}>
-                        👥 User Management ({usersList.length})
+                        👥 User Management ({usersTotal})
                     </button>
                 </div>
 
