@@ -61,6 +61,10 @@ const UserRepository = {
     async countTicketsByUser(id) {
         return (await query("SELECT COUNT(*)::int AS c FROM tickets WHERE user_id = $1 AND status = 'confirmed'", [id])).rows[0].c;
     },
+    async listByRole(role) {
+        const r = await query(`SELECT ${SAFE_COLS} FROM users WHERE role = $1 AND is_active = TRUE`, [role]);
+        return r.rows;
+    },
 };
 
 module.exports = UserRepository;

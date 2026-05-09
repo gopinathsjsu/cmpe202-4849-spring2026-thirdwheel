@@ -1,7 +1,7 @@
 const { bus, Events } = require('../domain/DomainEvents');
 const NotificationRepository = require('../repositories/NotificationRepository');
 const UserRepository = require('../repositories/UserRepository');
-const { sendEmail, ticketConfirmationEmail, eventApprovalEmail, eventCancelledEmail, eventRescheduledEmail } = require('../adapters/EmailAdapter');
+const { sendEmail, ticketConfirmationEmail, eventApprovalEmail, eventCreatedEmail, eventPendingReviewAdminEmail, eventCancelledEmail, eventRescheduledEmail } = require('../adapters/EmailAdapter');
 const AdminRepository = require('../repositories/AdminRepository');
 
 function registerObservers() {
@@ -12,6 +12,35 @@ function registerObservers() {
             const event = await EventRepository.findByIdRaw(eventId);
             if (user && event) await sendEmail(ticketConfirmationEmail(user, event, ticket));
         } catch (err) { console.error('Observer TICKET_PURCHASED failed:', err.message); }
+    });
+
+    bus.on(Events.EVENT_CREATED, async ({ event }) => {
+        try {
+            const organizer = await UserRepository.findByIdWithPassword(event.organizer_id);
+            if (organizer) {
+                // 1. Notify organizer that submission landed and is pending review.
+                await NotificationRepository.create({
+                    userId: organizer.id, type: 'info',
+                    title: 'Event Submitted',
+                    message: `Your event "${event.title}" is pending admin review.`,
+                    link: `/dashboard/my-events`,
+                });
+                await sendEmail(eventCreatedEmail(organizer, event));
+            }
+            // 2. Notify every active admin so they can review promptly.
+            const admins = await UserRepository.listByRole('admin');
+            for (const admin of admins) {
+                try {
+                    await NotificationRepository.create({
+                        userId: admin.id, type: 'info',
+                        title: 'New Event Pending',
+                        message: `${organizer?.name || 'An organizer'} submitted "${event.title}" — please review.`,
+                        link: `/admin`,
+                    });
+                    if (organizer) await sendEmail(eventPendingReviewAdminEmail(admin, organizer, event));
+                } catch (err) { console.error(`[observer] admin notif fail user=${admin.id}:`, err.message); }
+            }
+        } catch (err) { console.error('Observer EVENT_CREATED failed:', err.message); }
     });
 
     bus.on(Events.EVENT_APPROVED, async ({ event, adminId, reason, autoApproved }) => {

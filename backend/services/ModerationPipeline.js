@@ -43,10 +43,12 @@ class TrustedOrganizerHandler extends Handler {
 }
 
 function buildPipeline(deps) {
+    // TrustedOrganizer auto-approve intentionally disabled — every legitimate
+    // event must pass through the admin moderation queue. Class kept for
+    // reference; re-enable by inserting back into the chain.
     const spam = new SpamFilterHandler();
     const capacity = new CapacitySanityHandler();
-    const trusted = new TrustedOrganizerHandler(deps);
-    spam.setNext(capacity).setNext(trusted).setNext(new Handler());
+    spam.setNext(capacity).setNext(new Handler());
     return spam;
 }
 

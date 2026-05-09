@@ -187,6 +187,49 @@ function eventReminderEmail(user, event, hoursUntil) {
     };
 }
 
+function eventCreatedEmail(organizer, event) {
+    return {
+        to: organizer.email,
+        subject: `📝 Event Submitted — Pending Review: ${event.title}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:linear-gradient(135deg,#7c3aed,#06b6d4);padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">📝 Event Submitted</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${organizer.name},</p>
+        <p>Your event has been submitted and is now awaiting admin review. You'll get another email once it's approved (or if changes are needed).</p>
+        <p><strong>📅 When:</strong> ${event.date} at ${event.time}</p>
+        ${locationBlock(event)}
+        <p><strong>👥 Capacity:</strong> ${event.capacity}</p>
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
+function eventPendingReviewAdminEmail(admin, organizer, event) {
+    return {
+        to: admin.email,
+        subject: `🛎️ New Event Awaiting Review: ${event.title}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:#f59e0b;padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">🛎️ Review Required</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${admin.name},</p>
+        <p><strong>${organizer.name}</strong> just submitted a new event. Please review.</p>
+        <p><strong>📅 When:</strong> ${event.date} at ${event.time}</p>
+        ${locationBlock(event)}
+        <p><strong>👥 Capacity:</strong> ${event.capacity}</p>
+        <p><strong>💰 Price:</strong> ${event.price > 0 ? `$${event.price}` : 'Free'}</p>
+        <p><strong>📝 Description:</strong> ${(event.short_description || event.description || '').substring(0, 300)}${(event.description || '').length > 300 ? '…' : ''}</p>
+        <p style="margin-top:20px">
+          <a href="https://34.107.158.154.nip.io/admin" style="display:inline-block;background:#7c3aed;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600">→ Open Admin Panel</a>
+        </p>
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
 function ticketCancellationEmail(user, event, ticket) {
     return {
         to: user.email,
@@ -210,6 +253,8 @@ module.exports = {
     ticketConfirmationEmail,
     ticketCancellationEmail,
     eventApprovalEmail,
+    eventCreatedEmail,
+    eventPendingReviewAdminEmail,
     eventCancelledEmail,
     eventRescheduledEmail,
     eventReminderEmail,

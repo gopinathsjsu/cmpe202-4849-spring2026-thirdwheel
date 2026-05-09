@@ -18,19 +18,16 @@ test('capacity sanity rejects > 100k', async () => {
     assert.match(r.reason, /capacity/i);
 });
 
-test('trusted organizer auto-approves when >= 3 prior approvals', async () => {
-    const p = buildPipeline(fakeTrustedRepo(3));
-    const r = await p.handle({ event: { title: 'Normal Meetup', description: 'a regular meetup', capacity: 50, organizer_id: 7 } });
-    assert.equal(r.action, 'auto-approve');
-});
-
-test('untrusted organizer is queued for admin', async () => {
-    const p = buildPipeline(fakeTrustedRepo(0));
+// TrustedOrganizer auto-approve is intentionally disabled in the chain;
+// every clean event must hit the admin queue. The handler class is kept
+// for reference but is no longer wired in buildPipeline.
+test('clean event is queued for admin review (no auto-approve)', async () => {
+    const p = buildPipeline(fakeTrustedRepo(99));
     const r = await p.handle({ event: { title: 'Brand New Meetup', description: 'a regular meetup description', capacity: 50, organizer_id: 9 } });
     assert.equal(r.action, 'queue');
 });
 
-test('pipeline order: spam beats trust', async () => {
+test('pipeline order: spam still beats clean queue', async () => {
     const p = buildPipeline(fakeTrustedRepo(99));
     const r = await p.handle({ event: { title: 'lottery winner', description: 'sign up free iphone', capacity: 50, organizer_id: 1 } });
     assert.equal(r.action, 'auto-reject');
