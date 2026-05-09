@@ -128,6 +128,29 @@ UPDATE users SET name = 'Kalhar Patel'   WHERE email = 'kalharpatel10@gmail.com'
 UPDATE users SET name = 'Nihar Patel'    WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
 UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 
+-- Defensive role correction — covers prod DBs that ran the OLD mapping where
+-- Soham got the organizer slot and Nihar got the attendee slot. Swap them
+-- by current role so Nihar = organizer, Soham = attendee regardless of prior state.
+DO $$
+DECLARE
+  nihar_id INT;
+  soham_id INT;
+  nihar_role TEXT;
+  soham_role TEXT;
+BEGIN
+  SELECT id, role INTO nihar_id, nihar_role FROM users WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
+  SELECT id, role INTO soham_id, soham_role FROM users WHERE email = 'sohamrajjain0007@gmail.com';
+  IF nihar_id IS NOT NULL AND soham_id IS NOT NULL
+     AND nihar_role = 'attendee' AND soham_role = 'organizer' THEN
+    -- 3-step swap via temp email to avoid UNIQUE conflict.
+    UPDATE users SET email = 'temp-swap-1@zestify.local' WHERE id = nihar_id;
+    UPDATE users SET email = 'nihardharmeshkumar.patel@sjsu.edu' WHERE id = soham_id;
+    UPDATE users SET email = 'sohamrajjain0007@gmail.com' WHERE id = nihar_id;
+    UPDATE users SET name = 'Nihar Patel'    WHERE id = soham_id;
+    UPDATE users SET name = 'Soham Raj Jain' WHERE id = nihar_id;
+  END IF;
+END $$;
+
 -- Repair events.tickets_sold drift — authoritative recompute from tickets table.
 UPDATE events e
 SET tickets_sold = COALESCE((
