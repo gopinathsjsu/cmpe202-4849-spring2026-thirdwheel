@@ -26,18 +26,28 @@ const DUMMY_USERS = [
 ];
 
 async function resetDemoPasswords() {
-    for (const email of TEAM_ACCOUNTS) {
-        try {
-            const row = await query('SELECT password FROM users WHERE email = $1', [email]);
-            if (!row.rows.length) continue;
-            const current = row.rows[0].password;
-            if (current && bcrypt.compareSync(email, current)) continue;
-            const hash = bcrypt.hashSync(email, 10);
-            await query('UPDATE users SET password = $1 WHERE email = $2', [hash, email]);
-            console.log(`[demo-passwords] reset password for ${email}`);
-        } catch (err) {
-            console.error(`[demo-passwords] failed for ${email}:`, err.message);
+    // Reset password = email for every demo account: team gmails + every
+    // @zestify.com seed/dummy user. Skips signups (other domains) so real
+    // user passwords are never touched. Idempotent — bcrypt.compareSync
+    // check avoids re-hashing on every boot.
+    try {
+        const r = await query(
+            `SELECT email, password FROM users
+             WHERE email IN ($1, $2, $3) OR email LIKE '%@zestify.com'`,
+            TEAM_ACCOUNTS
+        );
+        for (const row of r.rows) {
+            try {
+                if (row.password && bcrypt.compareSync(row.email, row.password)) continue;
+                const hash = bcrypt.hashSync(row.email, 10);
+                await query('UPDATE users SET password = $1 WHERE email = $2', [hash, row.email]);
+                console.log(`[demo-passwords] reset password for ${row.email}`);
+            } catch (err) {
+                console.error(`[demo-passwords] failed for ${row.email}:`, err.message);
+            }
         }
+    } catch (err) {
+        console.error('[demo-passwords] resetDemoPasswords query failed:', err.message);
     }
 }
 
