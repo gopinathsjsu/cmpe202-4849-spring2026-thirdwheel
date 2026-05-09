@@ -60,6 +60,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       AUTH_RATE_LIMIT_MAX: 200
 
   api-events:
@@ -73,6 +74,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       EMAIL_PROVIDER: "${EMAIL_PROVIDER}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
@@ -91,6 +93,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       EMAIL_PROVIDER: "${EMAIL_PROVIDER}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
@@ -112,6 +115,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
       INTERNAL_SECRET: "${INTERNAL_SECRET}"
 
@@ -126,6 +130,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       EMAIL_PROVIDER: "${EMAIL_PROVIDER}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"
@@ -148,6 +153,7 @@ services:
       PGUSER: zestify
       PGPASSWORD: "${DB_PASS}"
       PGDATABASE: zestify
+      CORS_ORIGINS: "https://34.107.158.154.nip.io,http://34.107.158.154.nip.io,http://localhost:3000,http://localhost:3001"
       EMAIL_PROVIDER: "${EMAIL_PROVIDER}"
       SMTP_HOST: "${SMTP_HOST}"
       SMTP_PORT: "${SMTP_PORT}"

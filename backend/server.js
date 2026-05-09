@@ -7,7 +7,7 @@ const pino = require('pino');
 const pinoHttp = require('pino-http');
 
 const { migrate, ping, close } = require('./db/pool');
-const { resetDemoPasswords } = require('./db/demo-passwords');
+const { runDemoSeeds } = require('./db/demo-passwords');
 const { registerObservers } = require('./observers');
 const errorHandler = require('./middleware/errorHandler');
 
@@ -89,8 +89,8 @@ async function bootstrap() {
         logger.error({ err: e }, 'DB migrate failed');
         process.exit(1);
     }
-    // Post-migrate: enforce team demo password = email convention (idempotent).
-    resetDemoPasswords().catch((e) => logger.error({ err: e }, 'demo password reset failed'));
+    // Post-migrate: reset team passwords + insert dummy users + register them on events (idempotent).
+    runDemoSeeds().catch((e) => logger.error({ err: e }, 'demo seed failed'));
     registerObservers();
 
     const server = app.listen(PORT, '0.0.0.0', () => {
