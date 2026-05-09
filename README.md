@@ -17,6 +17,13 @@ system deployed on Google Cloud Platform.
 | 🏛️ **[architecture.md](architecture.md)** | UML component + deployment diagrams · 5 sequence diagrams · ER diagram · design-pattern class diagram (all Mermaid, GitHub-rendered) |
 | 🖼️ **[wireframes.md](wireframes.md)** | PNG mockups + ASCII + Mermaid for 13 screens + 5 email templates + site map + design tokens |
 | ☁️ **[deployment-gcp.md](deployment-gcp.md)** | GCP runbook (Compute MIG + LB + Cloud SQL + HTTPS + Terraform Cloud Run path) |
+| 📘 **[api-reference.md](api-reference.md)** | Every endpoint across 6 microservices — request/response bodies, error codes, cache keys, JWT structure |
+| 🎨 **[design-patterns-guide.md](design-patterns-guide.md)** | Walk-through of the 8 GoF patterns used (Repository · Strategy · Facade · Observer · CoR · State · Adapter · Template Method) |
+| 🧪 **[testing-strategy.md](testing-strategy.md)** | Unit + integration + smoke test pyramid; how each layer runs locally + in CI |
+| 🚨 **[infra-runbook.md](infra-runbook.md)** | On-call playbook — symptoms → root cause → recovery commands |
+| 🧭 **[adr/](adr/)** | Architecture Decision Records (5 entries — microservice split · shared module layout · in-process bus · partial unique index · Compute MIG vs Cloud Run) |
+| 🌐 **[nginx/README.md](nginx/README.md)** | nginx in-VM router config + lazy DNS rationale |
+| 📱 **[frontend/PAGES.md](frontend/PAGES.md)** | Every Next.js page + component + lib module with owner + API deps |
 | 📊 **[project-journal/](project-journal/)** | Weekly scrum · XP values · sprint backlog · burndown · per-sprint task boards |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [weekly-scrum.md](project-journal/weekly-scrum.md) | 12 weeks of standup 3Qs per member |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [xp-values.md](project-journal/xp-values.md) | Communication + Simplicity reflection |
