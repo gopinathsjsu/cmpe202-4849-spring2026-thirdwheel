@@ -53,6 +53,8 @@ services:
     image: ${REGISTRY}/api-auth:latest
     restart: always
     environment:
+      SERVICE: auth
+      PORT: 5001
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
@@ -64,6 +66,8 @@ services:
     image: ${REGISTRY}/api-events:latest
     restart: always
     environment:
+      SERVICE: events
+      PORT: 5002
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
@@ -80,6 +84,8 @@ services:
     image: ${REGISTRY}/api-tickets:latest
     restart: always
     environment:
+      SERVICE: tickets
+      PORT: 5003
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
@@ -99,6 +105,8 @@ services:
     image: ${REGISTRY}/api-payments:latest
     restart: always
     environment:
+      SERVICE: payments
+      PORT: 5006
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
@@ -111,6 +119,8 @@ services:
     image: ${REGISTRY}/api-notifications:latest
     restart: always
     environment:
+      SERVICE: notifications
+      PORT: 5004
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
@@ -131,6 +141,8 @@ services:
     image: ${REGISTRY}/api-admin:latest
     restart: always
     environment:
+      SERVICE: admin
+      PORT: 5005
       JWT_SECRET: "${JWT_SECRET}"
       PGHOST: "${DB_HOST}"
       PGUSER: zestify
