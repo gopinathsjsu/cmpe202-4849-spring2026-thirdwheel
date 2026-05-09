@@ -7,6 +7,7 @@ system deployed on Google Cloud Platform.
 
 > **Live demo:** **<https://34.107.158.154.nip.io>**
 > **Repo:** <https://github.com/gopinathsjsu/team-project-thirdwheel>
+> **Status:** ✅ Final submission — all tests passing, docs complete, deployment verified.
 
 ---
 
