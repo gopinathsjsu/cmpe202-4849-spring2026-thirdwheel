@@ -26,6 +26,23 @@ async function seed() {
                 [name, email, hashed, role, bio, phone]);
         }
 
+        // Dummy users: password = email (for easy demo login)
+        const dummyUsers = [
+            ['Priya Sharma', 'priya@zestify.com', 'attendee', 'UX designer & event lover', '555-0301'],
+            ['Ravi Kumar', 'ravi@zestify.com', 'attendee', 'Backend developer', '555-0302'],
+            ['Anita Desai', 'anita@zestify.com', 'attendee', 'Data analyst', '555-0303'],
+            ['Kevin Zhang', 'kevin@zestify.com', 'attendee', 'Product manager', '555-0304'],
+            ['Tanya Miller', 'tanya@zestify.com', 'attendee', 'Startup founder', '555-0305'],
+            ['Omar Farooq', 'omar@zestify.com', 'attendee', 'DevOps engineer', '555-0306'],
+            ['Jessica Lee', 'jessica@zestify.com', 'attendee', 'Content strategist', '555-0307'],
+            ['Ryan Brooks', 'ryan@zestify.com', 'organizer', 'Community event host', '555-0308'],
+        ];
+        for (const [name, email, role, bio, phone] of dummyUsers) {
+            const emailHash = bcrypt.hashSync(email, 10);
+            await c.query('INSERT INTO users (name, email, password, role, bio, phone) VALUES ($1,$2,$3,$4,$5,$6)',
+                [name, email, emailHash, role, bio, phone]);
+        }
+
         const categories = [
             ['Technology', 'technology', '💻', '#7c3aed', 'Tech conferences, hackathons, meetups'],
             ['Music', 'music', '🎵', '#ec4899', 'Concerts, festivals, live performances'],
@@ -164,12 +181,34 @@ async function seed() {
             );
         }
 
+        // Tickets: original users + dummy users registered on various events
+        // user_id, event_id, quantity, total_price, payment_method
         const tickets = [
+            // Original attendees (ids 6-10)
             [6, 1, 1, 0, 'free'], [7, 1, 1, 0, 'free'], [8, 1, 1, 0, 'free'],
             [6, 2, 2, 99.98, 'mock_card'], [9, 2, 1, 49.99, 'mock_card'],
             [10, 3, 1, 0, 'free'], [7, 4, 1, 15, 'mock_card'],
             [8, 5, 1, 0, 'free'], [9, 6, 1, 0, 'free'], [10, 7, 1, 75, 'mock_card'],
             [6, 8, 1, 0, 'free'], [7, 9, 1, 0, 'free'],
+            // Dummy users registrations (ids 11-18) spread across events
+            [11, 1, 1, 0, 'free'], [12, 1, 1, 0, 'free'], [13, 1, 1, 0, 'free'],
+            [14, 2, 1, 49.99, 'mock_card'], [15, 2, 1, 49.99, 'mock_card'],
+            [16, 2, 1, 49.99, 'mock_card'], [17, 2, 1, 49.99, 'mock_card'],
+            [11, 3, 1, 0, 'free'], [12, 3, 1, 0, 'free'],
+            [13, 4, 1, 15, 'mock_card'], [14, 4, 1, 15, 'mock_card'],
+            [15, 4, 1, 15, 'mock_card'], [16, 4, 1, 15, 'mock_card'],
+            [11, 5, 1, 0, 'free'], [12, 5, 1, 0, 'free'], [13, 5, 1, 0, 'free'],
+            [14, 5, 1, 0, 'free'],
+            [15, 6, 1, 0, 'free'], [16, 6, 1, 0, 'free'], [17, 6, 1, 0, 'free'],
+            [11, 7, 1, 75, 'mock_card'], [12, 7, 1, 75, 'mock_card'],
+            [13, 7, 1, 75, 'mock_card'],
+            [14, 8, 1, 0, 'free'], [15, 8, 1, 0, 'free'], [16, 8, 1, 0, 'free'],
+            [17, 8, 1, 0, 'free'],
+            [11, 9, 1, 0, 'free'], [14, 9, 1, 0, 'free'],
+            [12, 10, 1, 150, 'mock_card'], [15, 10, 1, 150, 'mock_card'],
+            [16, 10, 1, 150, 'mock_card'],
+            [13, 11, 1, 0, 'free'], [17, 11, 1, 0, 'free'],
+            [18, 1, 1, 0, 'free'], [18, 4, 1, 15, 'mock_card'], [18, 7, 1, 75, 'mock_card'],
         ];
         for (const [u, e, q, p, m] of tickets) {
             await c.query(
@@ -178,6 +217,14 @@ async function seed() {
                 [uuidv4().slice(0, 8).toUpperCase(), u, e, q, p, m]
             );
         }
+
+        // Recompute tickets_sold from actual ticket rows (authoritative)
+        await c.query(`
+            UPDATE events e SET tickets_sold = COALESCE((
+                SELECT SUM(quantity) FROM tickets t
+                WHERE t.event_id = e.id AND t.status = 'confirmed'
+            ), 0)
+        `);
 
         const notifs = [
             [6, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for SF Tech Summit 2026 has been confirmed.', '/events/1', true],
@@ -188,13 +235,19 @@ async function seed() {
             [3, 'event_approved', 'Event Approved', 'Your event "Neon Nights Music Festival" has been approved.', '/events/2', true],
             [9, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Virtual Design Systems Workshop has been confirmed.', '/events/6', false],
             [10, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Bay Area Marathon 2026 has been confirmed.', '/events/7', false],
+            [11, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for SF Tech Summit 2026 has been confirmed.', '/events/1', true],
+            [12, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Mindful Living Retreat has been confirmed.', '/events/3', false],
+            [13, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Gourmet Street Food Festival has been confirmed.', '/events/4', true],
+            [14, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Neon Nights Music Festival has been confirmed.', '/events/2', false],
+            [15, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Bay Area Marathon 2026 has been confirmed.', '/events/7', true],
+            [16, 'ticket_confirmation', 'Ticket Confirmed!', 'Your ticket for Charity Gala has been confirmed.', '/events/10', false],
         ];
         for (const [u, t, ti, m, l, r] of notifs) {
             await c.query('INSERT INTO notifications (user_id, type, title, message, link, is_read) VALUES ($1,$2,$3,$4,$5,$6)',
                 [u, t, ti, m, l, r]);
         }
 
-        console.log('Seed complete: 10 users, 10 categories, 13 events, 12 tickets, 8 notifications.');
+        console.log('Seed complete: 18 users, 10 categories, 13 events, 47 tickets, 14 notifications.');
     });
 
     await close();
