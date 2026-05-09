@@ -10,12 +10,23 @@ const stripePromise = PUBLISHABLE_KEY ? loadStripe(PUBLISHABLE_KEY) : null;
 function PaymentForm({ eventId, quantity, onSuccess, onError, processing, setProcessing }) {
     const stripe = useStripe();
     const elements = useElements();
+    const [paymentReady, setPaymentReady] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!stripe || !elements) return;
+        if (!stripe || !elements || !paymentReady) {
+            onError('Payment form still loading — please wait a moment');
+            return;
+        }
         setProcessing(true);
         try {
+            // Validate first to surface field errors before confirming.
+            const submitResult = await elements.submit();
+            if (submitResult.error) {
+                onError(submitResult.error.message || 'Please complete the card details');
+                setProcessing(false);
+                return;
+            }
             const { error, paymentIntent } = await stripe.confirmPayment({
                 elements,
                 confirmParams: { return_url: window.location.href },
@@ -46,14 +57,14 @@ function PaymentForm({ eventId, quantity, onSuccess, onError, processing, setPro
 
     return (
         <form onSubmit={handleSubmit}>
-            <PaymentElement options={{ layout: 'tabs' }} />
+            <PaymentElement options={{ layout: 'tabs' }} onReady={() => setPaymentReady(true)} />
             <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={!stripe || processing}
+                disabled={!stripe || !paymentReady || processing}
                 style={{ marginTop: 16, width: '100%' }}
             >
-                {processing ? 'Processing...' : 'Pay now'}
+                {processing ? 'Processing...' : !paymentReady ? 'Loading payment form...' : 'Pay now'}
             </button>
             <p style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)' }}>
                 🔒 Test card: <code>4242 4242 4242 4242</code> · any future date · any CVC.
@@ -85,7 +96,11 @@ export default function StripeCheckout({ eventId, quantity, onSuccess, onError }
         return <div style={{ padding: 12, color: 'var(--text-muted)' }}>Loading payment form…</div>;
     }
     return (
-        <Elements stripe={stripePromise} options={{ clientSecret, appearance: { theme: 'night' } }}>
+        <Elements
+            key={clientSecret}
+            stripe={stripePromise}
+            options={{ clientSecret, appearance: { theme: 'night' } }}
+        >
             <PaymentForm
                 eventId={eventId}
                 quantity={quantity}

@@ -61,6 +61,47 @@
     margin-bottom: 20px;
 }
 
+/* Events grid — must live in events.css (not only home.css) so /events
+   renders the grid correctly even when user lands directly without visiting / first. */
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 24px;
+}
+
+.pagination {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 32px;
+}
+
+.pagination button {
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: rgba(124, 58, 237, 0.1);
+    border-color: var(--violet);
+}
+
+.pagination button.active {
+    background: var(--violet);
+    border-color: var(--violet);
+    color: #fff;
+}
+
+.pagination button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
     .events-filters {
         flex-direction: column;
@@ -69,5 +110,9 @@
     .events-filters .form-select,
     .events-filters .form-input {
         max-width: 100% !important;
+    }
+
+    .events-grid {
+        grid-template-columns: 1fr;
     }
 }

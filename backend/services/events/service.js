@@ -22,7 +22,8 @@ const EventService = {
         const cached = await cache.get(key);
         if (cached) return cached;
         const result = await EventRepository.list(params);
-        await cache.set(key, result, 15_000);
+        // 2s TTL — keeps counters fresh across VMs (each container has its own in-memory cache).
+        await cache.set(key, result, 2_000);
         return result;
     },
 
@@ -31,7 +32,8 @@ const EventService = {
         const cached = await cache.get(`event:${id}`);
         const event = cached || await EventRepository.findById(id);
         if (!event) return null;
-        if (!cached) await cache.set(`event:${id}`, event, 30_000);
+        // 2s TTL for hot detail reads — capacity/tickets_sold stay live.
+        if (!cached) await cache.set(`event:${id}`, event, 2_000);
 
         let hasTicket = false, userTicket = null;
         if (requestingUserId) {

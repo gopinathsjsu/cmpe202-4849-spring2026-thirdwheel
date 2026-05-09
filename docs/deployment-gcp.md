@@ -75,3 +75,32 @@ This builds + pushes both images to Artifact Registry, then runs `terraform appl
 ## Secrets
 
 Never commit `terraform.tfvars` or `.env`. Use `TF_VAR_*` env vars or pull from a CI secret store.
+
+## HTTPS / TLS (Google-managed cert)
+
+Provisioned May 10 2026.
+
+```bash
+# 1. Reserve static IP at current LB address.
+gcloud compute addresses create zestify-ip --global --addresses=34.107.158.154
+
+# 2. Create Google-managed SSL cert (free, auto-renewed every 90 days).
+gcloud compute ssl-certificates create zestify-cert \
+  --domains=34.107.158.154.nip.io --global
+
+# 3. HTTPS proxy + forwarding rule on port 443.
+gcloud compute target-https-proxies create zestify-https-proxy \
+  --url-map=zestify-lb --ssl-certificates=zestify-cert --global
+
+gcloud compute forwarding-rules create zestify-https-fwd \
+  --address=zestify-ip --global \
+  --target-https-proxy=zestify-https-proxy --ports=443
+```
+
+Cert validation takes ~5-15 min (Google verifies the domain via the LB IP). After
+`gcloud compute ssl-certificates describe zestify-cert --global` reports `managed.status: ACTIVE`,
+the site is reachable at:
+
+- **https://34.107.158.154.nip.io** (TLS via Google Trust Services WR3)
+
+The HTTP forwarding rule (`zestify-fwd:80`) stays in parallel for backward compatibility.
