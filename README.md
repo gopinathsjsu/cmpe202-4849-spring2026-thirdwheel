@@ -27,8 +27,8 @@ system deployed on Google Cloud Platform.
 | 📊 **[project-journal/](project-journal/)** | Weekly scrum · XP values · sprint backlog · burndown · per-sprint task boards |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [weekly-scrum.md](project-journal/weekly-scrum.md) | 12 weeks of standup 3Qs per member |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [xp-values.md](project-journal/xp-values.md) | Communication + Simplicity reflection |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [sprint-backlog.csv](project-journal/sprint-backlog.csv) | 40 stories + 5 backlog items (Sheets-ready) |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [burndown.csv](project-journal/burndown.csv) | Velocity per sprint (Sheets-ready) |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ 📋 [Sprint Backlog (Google Sheets)](https://docs.google.com/spreadsheets/d/1LL2VSXJ_4P2bBccOt9CawthdoOFmHyPm_Z_LaQoCTU8/edit?usp=sharing) | 40 stories + 5 backlog items |
+| &nbsp;&nbsp;&nbsp;&nbsp;↳ 📉 [Burndown Chart (Google Sheets)](https://docs.google.com/spreadsheets/d/1pfZFIob01SSq-iKZ7EulmPKJFx50KMtb1R9XVKIM4v4/edit?usp=sharing) | Velocity per sprint |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [task-board.md](project-journal/task-board.md) | Index → [sprint-1](project-journal/task-board/sprint-1.md) · [2](project-journal/task-board/sprint-2.md) · [3](project-journal/task-board/sprint-3.md) · [4](project-journal/task-board/sprint-4.md) · [5](project-journal/task-board/sprint-5.md) · [6](project-journal/task-board/sprint-6.md) · [7](project-journal/task-board/sprint-7.md) |
 
 ---
