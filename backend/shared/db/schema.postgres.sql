@@ -126,3 +126,11 @@ UPDATE users SET email = 'nihardharmeshkumar.patel@sjsu.edu' WHERE email = 'alex
 UPDATE users SET name = 'Kalhar Patel'   WHERE email = 'kalharpatel10@gmail.com';
 UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 UPDATE users SET name = 'Nihar Patel'    WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
+
+-- Repair events.tickets_sold drift — authoritative recompute from tickets table.
+-- Safe to run at every container start; idempotent UPDATE.
+UPDATE events e
+SET tickets_sold = COALESCE((
+  SELECT SUM(quantity) FROM tickets t
+  WHERE t.event_id = e.id AND t.status = 'confirmed'
+), 0);

@@ -225,7 +225,23 @@ const EventRepository = {
             `UPDATE tickets SET status = 'cancelled'
        WHERE event_id = $1 AND status != 'cancelled'
        RETURNING *`, [eventId]);
+        // Keep events.tickets_sold in sync — all confirmed tickets just got cancelled,
+        // so the sold counter must drop to zero for this event.
+        await q.query(`UPDATE events SET tickets_sold = 0 WHERE id = $1`, [eventId]);
         return r.rows;
+    },
+
+    async recomputeTicketsSold(eventId, client) {
+        // Authoritative recompute from the tickets table. Used to repair drift
+        // (e.g. crash mid-cancel that decremented status but skipped the counter).
+        const q = client || { query };
+        await q.query(
+            `UPDATE events e
+         SET tickets_sold = COALESCE((
+           SELECT SUM(quantity) FROM tickets t
+           WHERE t.event_id = e.id AND t.status = 'confirmed'
+         ), 0)
+       WHERE id = $1`, [eventId]);
     },
 
     async findUpcomingNeedingReminder(hoursAhead = 12, windowHours = 1) {
