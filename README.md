@@ -22,10 +22,6 @@ system deployed on Google Cloud Platform.
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [xp-values.md](project-journal/xp-values.md) | Communication + Simplicity reflection |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [sprint-backlog.csv](project-journal/sprint-backlog.csv) | 40 stories + 5 backlog items (Sheets-ready) |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [burndown.csv](project-journal/burndown.csv) | Velocity per sprint (Sheets-ready) |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [burndown-daily-sprint7.csv](project-journal/burndown-daily-sprint7.csv) | Day-by-day burndown for final sprint |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [status-summary.csv](project-journal/status-summary.csv) | Story count + points by status |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [velocity-by-owner.csv](project-journal/velocity-by-owner.csv) | Points delivered per team member |
-| &nbsp;&nbsp;&nbsp;&nbsp;↳ [weekly-scrum.csv](project-journal/weekly-scrum.csv) | All 12 weeks × 3 members × 3Q standup answers in row form |
 | &nbsp;&nbsp;&nbsp;&nbsp;↳ [task-board.md](project-journal/task-board.md) | Index → [sprint-1](project-journal/task-board/sprint-1.md) · [2](project-journal/task-board/sprint-2.md) · [3](project-journal/task-board/sprint-3.md) · [4](project-journal/task-board/sprint-4.md) · [5](project-journal/task-board/sprint-5.md) · [6](project-journal/task-board/sprint-6.md) · [7](project-journal/task-board/sprint-7.md) |
 
 ---
