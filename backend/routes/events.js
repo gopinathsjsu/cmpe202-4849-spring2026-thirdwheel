@@ -96,6 +96,18 @@ router.delete('/:id', authenticateToken, requireRole('organizer', 'admin'), asyn
     res.json({ message: 'Event deleted.' });
 }));
 
+router.post('/:id/cancel', authenticateToken, requireRole('organizer', 'admin'), asyncHandler(async (req, res) => {
+    const result = await EventService.cancel(req.params.id, req.user, req.body.reason || '');
+    res.json({ message: 'Event cancelled.', ...result });
+}));
+
+router.post('/:id/reschedule', authenticateToken, requireRole('organizer', 'admin'), asyncHandler(async (req, res) => {
+    const { date, time, end_date, end_time, reason } = req.body;
+    if (!date || !time) return res.status(400).json({ error: 'New date and time are required.' });
+    const result = await EventService.reschedule(req.params.id, { date, time, end_date, end_time }, req.user, reason || '');
+    res.json({ message: 'Event rescheduled.', ...result });
+}));
+
 router.get('/:id/attendees', authenticateToken, requireRole('organizer', 'admin'), asyncHandler(async (req, res) => {
     const event = await EventRepository.findByIdRaw(req.params.id);
     if (!event) return res.status(404).json({ error: 'Event not found.' });

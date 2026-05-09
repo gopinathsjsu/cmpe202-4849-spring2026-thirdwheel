@@ -218,6 +218,43 @@ const EventRepository = {
        ORDER BY t.created_at DESC`, [eventId]);
         return r.rows;
     },
+
+    async cancelAllTicketsForEvent(eventId, client) {
+        const q = client || { query };
+        const r = await q.query(
+            `UPDATE tickets SET status = 'cancelled'
+       WHERE event_id = $1 AND status != 'cancelled'
+       RETURNING *`, [eventId]);
+        await q.query(`UPDATE events SET tickets_sold = 0 WHERE id = $1`, [eventId]);
+        return r.rows;
+    },
+
+    async recomputeTicketsSold(eventId, client) {
+        const q = client || { query };
+        await q.query(
+            `UPDATE events e
+         SET tickets_sold = COALESCE((
+           SELECT SUM(quantity) FROM tickets t
+           WHERE t.event_id = e.id AND t.status = 'confirmed'
+         ), 0)
+       WHERE id = $1`, [eventId]);
+    },
+
+    async findUpcomingNeedingReminder(hoursAhead = 12, windowHours = 1) {
+        const r = await query(
+            `SELECT * FROM events
+       WHERE status = 'approved'
+         AND reminder_sent_at IS NULL
+         AND (date::timestamp + time::time)
+             BETWEEN NOW() + ($1::int || ' hours')::interval - ($2::int || ' hours')::interval
+                 AND NOW() + ($1::int || ' hours')::interval + ($2::int || ' hours')::interval`,
+            [hoursAhead, windowHours]);
+        return r.rows;
+    },
+
+    async markReminderSent(eventId) {
+        await query('UPDATE events SET reminder_sent_at = NOW() WHERE id = $1', [eventId]);
+    },
 };
 
 module.exports = { EventRepository, withTx };

@@ -1,7 +1,7 @@
 const { bus, Events } = require('../domain/DomainEvents');
 const NotificationRepository = require('../repositories/NotificationRepository');
 const UserRepository = require('../repositories/UserRepository');
-const { sendEmail, ticketConfirmationEmail, eventApprovalEmail } = require('../adapters/EmailAdapter');
+const { sendEmail, ticketConfirmationEmail, eventApprovalEmail, eventCancelledEmail, eventRescheduledEmail } = require('../adapters/EmailAdapter');
 const AdminRepository = require('../repositories/AdminRepository');
 
 function registerObservers() {
@@ -41,6 +41,40 @@ function registerObservers() {
             if (adminId) await AdminRepository.logAction({ adminId, action: 'reject', targetType: 'event', targetId: event.id, reason });
             if (autoRejected) await AdminRepository.logAction({ adminId: event.organizer_id, action: 'auto_reject', targetType: 'event', targetId: event.id, reason: reason || 'auto' });
         } catch (err) { console.error('Observer EVENT_REJECTED failed:', err.message); }
+    });
+
+    bus.on(Events.EVENT_CANCELLED, async ({ event, attendees, reason }) => {
+        console.log(`[observer] EVENT_CANCELLED id=${event.id} attendees=${attendees.length}`);
+        for (const a of attendees) {
+            try {
+                await NotificationRepository.create({
+                    userId: a.user_id, type: 'event_cancelled',
+                    title: 'Event Cancelled',
+                    message: `"${event.title}" scheduled for ${event.date} ${event.time} has been cancelled.`,
+                    link: `/events/${event.id}`,
+                });
+            } catch (err) { console.error(`[observer] notif fail user=${a.user_id}:`, err.message); }
+            try {
+                await sendEmail(eventCancelledEmail({ name: a.name, email: a.email }, event, reason));
+            } catch (err) { console.error(`[observer] email fail user=${a.user_id}:`, err.message); }
+        }
+    });
+
+    bus.on(Events.EVENT_RESCHEDULED, async ({ event, attendees, oldDate, oldTime }) => {
+        console.log(`[observer] EVENT_RESCHEDULED id=${event.id} attendees=${attendees.length}`);
+        for (const a of attendees) {
+            try {
+                await NotificationRepository.create({
+                    userId: a.user_id, type: 'event_rescheduled',
+                    title: 'Event Rescheduled',
+                    message: `"${event.title}" moved from ${oldDate} ${oldTime} → ${event.date} ${event.time}.`,
+                    link: `/events/${event.id}`,
+                });
+            } catch (err) { console.error(`[observer] notif fail user=${a.user_id}:`, err.message); }
+            try {
+                await sendEmail(eventRescheduledEmail({ name: a.name, email: a.email }, event, oldDate, oldTime));
+            } catch (err) { console.error(`[observer] email fail user=${a.user_id}:`, err.message); }
+        }
     });
 }
 

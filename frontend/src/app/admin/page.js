@@ -1,5 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { admin as adminApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/lib/toast';
@@ -7,7 +8,8 @@ import '../dashboard/dashboard.css';
 import './admin.css';
 
 export default function AdminPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const toast = useToast();
     const [tab, setTab] = useState('events');
     const [stats, setStats] = useState(null);
@@ -15,9 +17,18 @@ export default function AdminPage() {
     const [usersList, setUsersList] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    // Route guard: only admin can access this page
     useEffect(() => {
-        loadData();
-    }, []);
+        if (!authLoading && (!user || user.role !== 'admin')) {
+            router.push('/events');
+        }
+    }, [user, authLoading, router]);
+
+    useEffect(() => {
+        if (user && user.role === 'admin') {
+            loadData();
+        }
+    }, [user]);
 
     const loadData = async () => {
         setLoading(true);
@@ -72,6 +83,18 @@ export default function AdminPage() {
         const d = new Date(dateStr + 'T00:00:00');
         return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
     };
+
+    // Block render while auth loading or non-admin
+    if (authLoading || !user || user.role !== 'admin') {
+        return (
+            <div className="page-wrapper container">
+                <div className="skeleton" style={{ height: 40, width: 300, marginBottom: 24 }}></div>
+                <div className="stats-grid">
+                    {[1, 2, 3, 4].map(i => <div key={i} className="skeleton" style={{ height: 100 }}></div>)}
+                </div>
+            </div>
+        );
+    }
 
     if (loading) {
         return (

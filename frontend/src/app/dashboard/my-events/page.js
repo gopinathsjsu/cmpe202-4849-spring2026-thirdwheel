@@ -1,18 +1,28 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { users as usersApi, events as eventsApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import '../dashboard.css';
 
 export default function MyEventsPage() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter();
     const [eventsList, setEventsList] = useState([]);
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
 
+    // Route guard: only organizer/admin can access
     useEffect(() => {
+        if (!authLoading && (!user || (user.role !== 'organizer' && user.role !== 'admin'))) {
+            router.push('/dashboard/my-tickets');
+        }
+    }, [user, authLoading, router]);
+
+    useEffect(() => {
+        if (!user || (user.role !== 'organizer' && user.role !== 'admin')) return;
         Promise.all([
             usersApi.myEvents(statusFilter ? { status: statusFilter } : {}),
             usersApi.myStats(),
@@ -20,7 +30,7 @@ export default function MyEventsPage() {
             setEventsList(e.events);
             setStats(s.stats);
         }).catch(console.error).finally(() => setLoading(false));
-    }, [statusFilter]);
+    }, [statusFilter, user]);
 
     const formatDate = (dateStr) => {
         const d = new Date(dateStr + 'T00:00:00');

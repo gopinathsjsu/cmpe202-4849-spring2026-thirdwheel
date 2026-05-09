@@ -11,6 +11,9 @@ const Events = Object.freeze({
     EVENT_APPROVED: 'event.approved',
     EVENT_REJECTED: 'event.rejected',
     EVENT_CREATED: 'event.created',
+    EVENT_CANCELLED: 'event.cancelled',
+    EVENT_RESCHEDULED: 'event.rescheduled',
+    EVENT_REMINDER_DUE: 'event.reminder.due',
     USER_REGISTERED: 'user.registered',
 });
 

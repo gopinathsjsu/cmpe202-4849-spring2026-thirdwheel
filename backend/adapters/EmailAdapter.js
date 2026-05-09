@@ -69,6 +69,33 @@ async function sendEmail(message) {
     return getProvider().send(message);
 }
 
+// Build Google Maps URL — lat/lon if available else search by location string.
+function mapsUrlForEvent(event) {
+    if (event.is_online && event.online_url) return event.online_url;
+    if (event.latitude != null && event.longitude != null) {
+        return `https://www.google.com/maps/search/?api=1&query=${event.latitude},${event.longitude}`;
+    }
+    const q = [event.venue_name, event.address, event.city, event.state, event.zip, event.location]
+        .filter(Boolean).join(', ');
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q || event.location || '')}`;
+}
+
+function locationBlock(event) {
+    const url = mapsUrlForEvent(event);
+    const label = event.is_online
+        ? `💻 ${event.venue_name || 'Online Event'}`
+        : `📍 ${[event.venue_name, event.address, event.city, event.state, event.zip].filter(Boolean).join(', ') || event.location}`;
+    const linkText = event.is_online ? '→ Join Online' : '→ Open in Google Maps';
+    return `
+      <p style="margin:8px 0">${label}</p>
+      <p style="margin:8px 0">
+        <a href="${url}" target="_blank" rel="noopener"
+           style="display:inline-block;background:#06b6d4;color:#fff;padding:10px 16px;border-radius:8px;text-decoration:none;font-weight:600">
+          ${linkText}
+        </a>
+      </p>`;
+}
+
 // Template Method-style email factories
 function ticketConfirmationEmail(user, event, ticket) {
     return {
@@ -80,7 +107,7 @@ function ticketConfirmationEmail(user, event, ticket) {
       <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
         <h2>${event.title}</h2>
         <p>📅 ${event.date} at ${event.time}</p>
-        <p>📍 ${event.location}</p>
+        ${locationBlock(event)}
         <p>🎫 Code: <strong>${ticket.ticket_code}</strong></p>
         <p>👤 ${user.name}</p>
       </div></div>`,
@@ -101,4 +128,90 @@ function eventApprovalEmail(organizer, event, approved) {
     };
 }
 
-module.exports = { sendEmail, ticketConfirmationEmail, eventApprovalEmail, getProvider };
+function eventCancelledEmail(user, event, reason) {
+    return {
+        to: user.email,
+        subject: `❌ Event Cancelled: ${event.title}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:#ef4444;padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">❌ Event Cancelled</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${user.name},</p>
+        <p>The event you registered for has been cancelled.</p>
+        <p><strong>Originally scheduled:</strong> 📅 ${event.date} at ${event.time}</p>
+        ${locationBlock(event)}
+        ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
+        <p>Your ticket has been automatically cancelled. If payment was charged, refund handled separately.</p>
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
+function eventRescheduledEmail(user, event, oldDate, oldTime) {
+    return {
+        to: user.email,
+        subject: `📅 Event Rescheduled: ${event.title}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:linear-gradient(135deg,#f59e0b,#7c3aed);padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">📅 Event Rescheduled</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${user.name},</p>
+        <p>The event you registered for has been rescheduled.</p>
+        <p><strong>Old schedule:</strong> <s>${oldDate} at ${oldTime}</s></p>
+        <p><strong>New schedule:</strong> 🆕 <strong>${event.date} at ${event.time}</strong></p>
+        ${locationBlock(event)}
+        <p>Your ticket remains valid. Add the new time to your calendar.</p>
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
+function eventReminderEmail(user, event, hoursUntil) {
+    return {
+        to: user.email,
+        subject: `⏰ Reminder: ${event.title} starts in ${hoursUntil}h`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:linear-gradient(135deg,#06b6d4,#7c3aed);padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">⏰ Event Starting Soon</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${user.name},</p>
+        <p>Just a heads-up — your event starts in about <strong>${hoursUntil} hours</strong>.</p>
+        <p><strong>📅 When:</strong> ${event.date} at ${event.time}</p>
+        ${locationBlock(event)}
+        <p>See you there!</p>
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
+function ticketCancellationEmail(user, event, ticket) {
+    return {
+        to: user.email,
+        subject: `🎫 Ticket Cancelled: ${event.title}`,
+        html: `<div style="font-family:Arial,sans-serif;max-width:600px;margin:auto">
+      <div style="background:#64748b;padding:30px;border-radius:12px 12px 0 0;color:#fff">
+        <h1 style="margin:0">Ticket Cancelled</h1></div>
+      <div style="background:#f8fafc;padding:30px;border:1px solid #e2e8f0;border-top:0;border-radius:0 0 12px 12px">
+        <h2>${event.title}</h2>
+        <p>Hi ${user.name},</p>
+        <p>Your ticket (code <strong>${ticket.ticket_code}</strong>) for this event has been cancelled.</p>
+        <p>📅 ${event.date} at ${event.time}</p>
+        ${locationBlock(event)}
+        <p style="color:#94a3b8;font-size:14px">— Zestify Events</p>
+      </div></div>`,
+    };
+}
+
+module.exports = {
+    sendEmail,
+    ticketConfirmationEmail,
+    ticketCancellationEmail,
+    eventApprovalEmail,
+    eventCancelledEmail,
+    eventRescheduledEmail,
+    eventReminderEmail,
+    getProvider,
+};

@@ -22,7 +22,8 @@ const EventService = {
         const cached = await cache.get(key);
         if (cached) return cached;
         const result = await EventRepository.list(params);
-        await cache.set(key, result, 15_000);
+        // 2s TTL — keeps counters fresh across VMs (each container has its own in-memory cache).
+        await cache.set(key, result, 2_000);
         return result;
     },
 
@@ -31,7 +32,8 @@ const EventService = {
         const cached = await cache.get(`event:${id}`);
         const event = cached || await EventRepository.findById(id);
         if (!event) return null;
-        if (!cached) await cache.set(`event:${id}`, event, 30_000);
+        // 2s TTL for hot detail reads — capacity/tickets_sold stay live.
+        if (!cached) await cache.set(`event:${id}`, event, 2_000);
 
         let hasTicket = false, userTicket = null;
         if (requestingUserId) {
@@ -85,6 +87,45 @@ const EventService = {
         await EventRepository.delete(id);
         getCache().del(`event:${id}`).catch(() => {});
         getCache().del('events:list:').catch(() => {});
+    },
+
+    async cancel(id, user, reason = '') {
+        const existing = await EventRepository.findByIdRaw(id);
+        if (!existing) throw Object.assign(new Error('Event not found.'), { statusCode: 404 });
+        if (user.role !== 'admin' && existing.organizer_id !== user.id) {
+            throw Object.assign(new Error('You can only cancel your own events.'), { statusCode: 403 });
+        }
+        if (existing.status === 'cancelled') {
+            throw Object.assign(new Error('Event already cancelled.'), { statusCode: 400 });
+        }
+        const attendees = await EventRepository.attendees(id);
+        await EventRepository.setStatus(id, 'cancelled');
+        const cancelledTickets = await EventRepository.cancelAllTicketsForEvent(id);
+        const updated = await EventRepository.findByIdRaw(id);
+        emitDomain(Events.EVENT_CANCELLED, { event: updated, attendees, cancelledBy: user, reason });
+        getCache().del(`event:${id}`).catch(() => {});
+        getCache().del('events:list:').catch(() => {});
+        return { event: updated, attendeesNotified: attendees.length, ticketsCancelled: cancelledTickets.length };
+    },
+
+    async reschedule(id, { date, time, end_date, end_time }, user, reason = '') {
+        const existing = await EventRepository.findByIdRaw(id);
+        if (!existing) throw Object.assign(new Error('Event not found.'), { statusCode: 404 });
+        if (user.role !== 'admin' && existing.organizer_id !== user.id) {
+            throw Object.assign(new Error('You can only reschedule your own events.'), { statusCode: 403 });
+        }
+        if (existing.status === 'cancelled' || existing.status === 'completed') {
+            throw Object.assign(new Error(`Cannot reschedule ${existing.status} event.`), { statusCode: 400 });
+        }
+        const oldDate = existing.date;
+        const oldTime = existing.time;
+        const updated = await EventRepository.update(id, { date, time, end_date, end_time });
+        await query('UPDATE events SET reminder_sent_at = NULL WHERE id = $1', [id]);
+        const attendees = await EventRepository.attendees(id);
+        emitDomain(Events.EVENT_RESCHEDULED, { event: updated, attendees, oldDate, oldTime, rescheduledBy: user, reason });
+        getCache().del(`event:${id}`).catch(() => {});
+        getCache().del('events:list:').catch(() => {});
+        return { event: updated, attendeesNotified: attendees.length };
     },
 
     async approve(id, adminId, reason = '') {
