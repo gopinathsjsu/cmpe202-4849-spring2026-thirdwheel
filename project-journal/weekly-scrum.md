@@ -184,7 +184,7 @@ Each weekly entry below covers the three daily-scrum questions for each team mem
 
 **Nihar Patel**
 - Done: CI/CD workflow; deploy.sh; GCP deploy guide; VM startup script + instance template.
-- Next: Jenkins-in-Docker setup + ci-local helper; Terraform root module + artifact_registry / cloud_run_frontend modules.
+- Next: ci-local helper script; Terraform root module + artifact_registry / cloud_run_frontend modules.
 - Blocked: None.
 
 **Soham Raj Jain**
@@ -204,7 +204,7 @@ Each weekly entry below covers the three daily-scrum questions for each team mem
 ### Week 11 — Apr 26 – May 3
 
 **Nihar Patel**
-- Done: Jenkinsfile + jenkins/docker-compose setup; Terraform root + AR + cloud_run_frontend modules.
+- Done: ci-local helper + GitHub Actions matrix tuning; Terraform root + AR + cloud_run_frontend modules.
 - Next: Migrate seed users to team Gmails; HTTPS LB; **role-aware event detail page** with cancel + reschedule for admin/organizer.
 - Blocked: Need Kalhar's reminder cron + email templates before observers can send the event-cancelled / rescheduled emails.
 
