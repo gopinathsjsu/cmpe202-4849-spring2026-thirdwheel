@@ -155,7 +155,7 @@ test('Tickets: full purchase + cancel + repurchase round-trip (no unique-key con
 });
 
 test('Notifications: list returns shape', async () => {
-    const token = await login('alex@zestify.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', PASS);
     const r = await api('/api/notifications?limit=5', { headers: { Authorization: `Bearer ${token}` } });
     assert.equal(r.status, 200);
     assert.ok('unreadCount' in r.body);
@@ -163,7 +163,7 @@ test('Notifications: list returns shape', async () => {
 });
 
 test('Moderation pipeline: spam keywords auto-rejected on create', async () => {
-    const token = await login('elena@zestify.com', PASS);
+    const token = await login('nihardharmeshkumar.patel@sjsu.edu', PASS);
     const r = await api('/api/events', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -179,7 +179,7 @@ test('Moderation pipeline: spam keywords auto-rejected on create', async () => {
 });
 
 test('Moderation pipeline: capacity > 100k auto-rejected', async () => {
-    const token = await login('elena@zestify.com', PASS);
+    const token = await login('nihardharmeshkumar.patel@sjsu.edu', PASS);
     const r = await api('/api/events', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
@@ -211,7 +211,7 @@ test('Unknown route returns 404', async () => {
 });
 
 test('Stripe: PaymentIntent created for paid event', { skip: !process.env.STRIPE_SECRET_KEY ? 'STRIPE_SECRET_KEY not set' : false }, async () => {
-    const token = await login('alex@zestify.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', PASS);
     const events = await api('/api/events?limit=20');
     const paid = events.body.events.find(e => e.price > 0);
     assert.ok(paid, 'no paid event seeded');
@@ -227,7 +227,7 @@ test('Stripe: PaymentIntent created for paid event', { skip: !process.env.STRIPE
 });
 
 test('Stripe: PaymentIntent rejected for free event', async () => {
-    const token = await login('alex@zestify.com', PASS);
+    const token = await login('sohamrajjain0007@gmail.com', PASS);
     const events = await api('/api/events?limit=20');
     const free = events.body.events.find(e => e.price === 0);
     const r = await api('/api/payments/intent', {
