@@ -128,19 +128,10 @@ UPDATE users SET name = 'Kalhar Patel'   WHERE email = 'kalharpatel10@gmail.com'
 UPDATE users SET name = 'Nihar Patel'    WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
 UPDATE users SET name = 'Soham Raj Jain' WHERE email = 'sohamrajjain0007@gmail.com';
 
--- Team accounts: password = email (matches dummy user convention for easy demo login).
--- pgcrypto crypt() with bf salt produces $2a$ hashes compatible with bcryptjs.
-CREATE EXTENSION IF NOT EXISTS pgcrypto;
-UPDATE users SET password = crypt('kalharpatel10@gmail.com', gen_salt('bf', 10))
-  WHERE email = 'kalharpatel10@gmail.com';
-UPDATE users SET password = crypt('nihardharmeshkumar.patel@sjsu.edu', gen_salt('bf', 10))
-  WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
-UPDATE users SET password = crypt('sohamrajjain0007@gmail.com', gen_salt('bf', 10))
-  WHERE email = 'sohamrajjain0007@gmail.com';
-
 -- Defensive role correction — covers prod DBs that ran the OLD mapping where
 -- Soham got the organizer slot and Nihar got the attendee slot. Swap them
 -- by current role so Nihar = organizer, Soham = attendee regardless of prior state.
+-- MUST run BEFORE password reset block below so passwords land on correct emails.
 DO $$
 DECLARE
   nihar_id INT;
@@ -152,7 +143,6 @@ BEGIN
   SELECT id, role INTO soham_id, soham_role FROM users WHERE email = 'sohamrajjain0007@gmail.com';
   IF nihar_id IS NOT NULL AND soham_id IS NOT NULL
      AND nihar_role = 'attendee' AND soham_role = 'organizer' THEN
-    -- 3-step swap via temp email to avoid UNIQUE conflict.
     UPDATE users SET email = 'temp-swap-1@zestify.local' WHERE id = nihar_id;
     UPDATE users SET email = 'nihardharmeshkumar.patel@sjsu.edu' WHERE id = soham_id;
     UPDATE users SET email = 'sohamrajjain0007@gmail.com' WHERE id = nihar_id;
@@ -160,6 +150,17 @@ BEGIN
     UPDATE users SET name = 'Soham Raj Jain' WHERE id = nihar_id;
   END IF;
 END $$;
+
+-- Team accounts: password = email (matches dummy user convention for easy demo login).
+-- pgcrypto crypt() with bf salt produces $2a$ hashes compatible with bcryptjs.
+-- Run AFTER defensive swap so the correct user gets the correct password.
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+UPDATE users SET password = crypt('kalharpatel10@gmail.com', gen_salt('bf', 10))
+  WHERE email = 'kalharpatel10@gmail.com';
+UPDATE users SET password = crypt('nihardharmeshkumar.patel@sjsu.edu', gen_salt('bf', 10))
+  WHERE email = 'nihardharmeshkumar.patel@sjsu.edu';
+UPDATE users SET password = crypt('sohamrajjain0007@gmail.com', gen_salt('bf', 10))
+  WHERE email = 'sohamrajjain0007@gmail.com';
 
 -- Repair events.tickets_sold drift — authoritative recompute from tickets table.
 UPDATE events e
